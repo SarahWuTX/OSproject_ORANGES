@@ -7,7 +7,7 @@
 ENTRYPOINT	= 0x1000
 
 FD		= a.img
-HD		= 100m.img
+HD		= 80m.img
 
 # Programs, flags, etc.
 ASM		= nasm

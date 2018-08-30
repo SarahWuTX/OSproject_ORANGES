@@ -19,10 +19,10 @@ ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
 #    2. boot/include/load.inc::ROOT_BASE
 #    3. Makefile::HD
 #    4. commands/Makefile::HD
-ata0-master: type=disk, path="100m.img", mode=flat, cylinders=203, heads=16, spt=63
+ata0-master: type=disk, path="80m.img", mode=flat, cylinders=162, heads=16, spt=63
 
 # choose the boot disk.
-boot: a
+boot: c
 
 # where do we send log messages?
 # log: bochsout.txt

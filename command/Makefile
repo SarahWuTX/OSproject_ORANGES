@@ -1,7 +1,7 @@
 # commands/Makefile
 
 #ENTRYPOINT	= 0x1000
-HD		= ../100m.img
+HD		= ../80m.img
 
 ASM		= nasm
 DASM		= objdump

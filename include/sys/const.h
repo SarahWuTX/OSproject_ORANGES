@@ -262,7 +262,6 @@ enum msgtype {
 /* device numbers of hard disk */
 #define	MINOR_hd1a		0x10
 #define	MINOR_hd2a		(MINOR_hd1a+NR_SUB_PER_PART)
-#define	MINOR_hd2c		(MINOR_hd1a+NR_SUB_PER_PART+2)
 
 #define	ROOT_DEV		MAKE_DEV(DEV_HD, MINOR_BOOT)
 

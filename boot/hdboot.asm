@@ -144,9 +144,9 @@ disp_str:
 	mov	ax, MessageLength
 	mul	dh
 	add	ax, BootMessage
-	mov	bp, ax			; ┓
-	mov	ax, ds			; ┣ ES:BP = 串地址
-	mov	es, ax			; ┛
+	mov	bp, ax			; `.
+	mov	ax, ds			;  | ES:BP = 串地址
+	mov	es, ax			; /
 	mov	cx, MessageLength	; CX = 串长度
 	mov	ax, 0x1301		; AH = 0x13,  AL = 0x1
 	mov	bx, 0x7			; 页号为0(BH = 0) 黑底白字(BL = 0x7)

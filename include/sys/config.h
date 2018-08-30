@@ -14,7 +14,7 @@
  * @attention INSTALL_NR_SECTS should be a multiple of NR_DEFAULT_FILE_SECTS:
  *                INSTALL_NR_SECTS = n * NR_DEFAULT_FILE_SECTS (n=1,2,3,...)
  */
-#define	INSTALL_START_SECT		0x17000
+#define	INSTALL_START_SECT		0x8000
 #define	INSTALL_NR_SECTS		0x800
 
 /**
@@ -32,7 +32,7 @@
  * corresponding with boot/include/load.inc::ROOT_BASE, which should
  * be changed if this macro is changed.
  */
-#define	MINOR_BOOT			MINOR_hd2c
+#define	MINOR_BOOT			MINOR_hd2a
 
 /*
  * disk log

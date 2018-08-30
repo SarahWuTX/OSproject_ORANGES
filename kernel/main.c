@@ -217,7 +217,7 @@ void untar(const char * filename)
 			close(fd);
 			return;
 		}
-		printf("    %s", phdr->name);
+		printf("    %s\n", phdr->name);
 		while (bytes_left) {
 			int iobytes = min(chunk, bytes_left);
 			read(fd, buf,
@@ -225,9 +225,7 @@ void untar(const char * filename)
 			bytes = write(fdout, buf, iobytes);
 			assert(bytes == iobytes);
 			bytes_left -= iobytes;
-			printf(".");
 		}
-		printf("\n");
 		close(fdout);
 	}
 
