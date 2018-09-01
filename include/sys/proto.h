@@ -143,6 +143,11 @@ PUBLIC	int	sys_printx(int _unused1, int _unused2, char* s, struct proc * p_proc)
 
 /* syscall.asm */
 PUBLIC  void    sys_call();             /* int_handler */
+PUBLIC 	void	xia_call();
+PUBLIC  int	xia();
+
+/*sys_xia.c*/
+PUBLIC	int sys_xia();
 
 /* 系统调用 - 用户级 */
 PUBLIC	int	sendrec(int function, int src_dest, MESSAGE* p_msg);

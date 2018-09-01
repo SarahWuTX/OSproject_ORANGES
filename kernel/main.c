@@ -1,11 +1,9 @@
-/*************************************************************************//**
- *****************************************************************************
- * @file   main.c
- * @brief  
- * @author Forrest Y. Yu
- * @date   2005
- *****************************************************************************
- *****************************************************************************/
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+main.c
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #include "type.h"
 #include "stdio.h"
@@ -59,7 +57,7 @@ void showProcess();
 void killProcess();
 void makeProcess();
 void help();
-void colorful();
+void animation();
 void createFile(char * filepath, char *filename, char * buf);
 void createDir(char * filepath, char *filename);
 void readFile(char * filename);
@@ -85,211 +83,111 @@ PUBLIC int kernel_main()
 {
 
 	disp_str("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
-
 		"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 
-
-
 	int i, j, eflags, prio;
-
 	u8  rpl;
-
 	u8  priv; /* privilege */
 
-
-
 	struct task * t;
-
 	struct proc * p = proc_table;
-
-
 
 	char * stk = task_stack + STACK_SIZE_TOTAL;
 
-
-
 	for (i = 0; i < NR_TASKS + NR_PROCS; i++, p++, t++) {
-
 		if (i >= NR_TASKS + NR_NATIVE_PROCS) {
-
 			p->p_flags = FREE_SLOT;
-
 			continue;
-
 		}
 
-
-
 		if (i < NR_TASKS) {     /* TASK */
-
 			t = task_table + i;
-
 			priv = PRIVILEGE_TASK;
-
 			rpl = RPL_TASK;
-
 			eflags = 0x1202;/* IF=1, IOPL=1, bit 2 is always 1 */
-
 			prio = 15;
-
 		}
 
 		else {                  /* USER PROC */
-
 			t = user_proc_table + (i - NR_TASKS);
-
 			priv = PRIVILEGE_USER;
-
 			rpl = RPL_USER;
-
 			eflags = 0x202;	/* IF=1, bit 2 is always 1 */
-
 			prio = 5;
-
 		}
 
-
-
 		strcpy(p->name, t->name);	/* name of the process */
-
 		p->p_parent = NO_TASK;
 
-
-
 		if (strcmp(t->name, "INIT") != 0) {
-
 			p->ldts[INDEX_LDT_C] = gdt[SELECTOR_KERNEL_CS >> 3];
-
 			p->ldts[INDEX_LDT_RW] = gdt[SELECTOR_KERNEL_DS >> 3];
 
-
-
 			/* change the DPLs */
-
 			p->ldts[INDEX_LDT_C].attr1 = DA_C | priv << 5;
-
 			p->ldts[INDEX_LDT_RW].attr1 = DA_DRW | priv << 5;
-
 		}
 
 		else {		/* INIT process */
-
 			unsigned int k_base;
-
 			unsigned int k_limit;
-
 			int ret = get_kernel_map(&k_base, &k_limit);
-
 			assert(ret == 0);
-
 			init_desc(&p->ldts[INDEX_LDT_C],
-
 				0, /* bytes before the entry point
-
 				   * are useless (wasted) for the
-
 				   * INIT process, doesn't matter
-
 				   */
-
 				(k_base + k_limit) >> LIMIT_4K_SHIFT,
-
 				DA_32 | DA_LIMIT_4K | DA_C | priv << 5);
 
-
-
 			init_desc(&p->ldts[INDEX_LDT_RW],
-
 				0, /* bytes before the entry point
-
 				   * are useless (wasted) for the
-
 				   * INIT process, doesn't matter
-
 				   */
 
 				(k_base + k_limit) >> LIMIT_4K_SHIFT,
-
 				DA_32 | DA_LIMIT_4K | DA_DRW | priv << 5);
-
 		}
 
-
-
 		p->regs.cs = INDEX_LDT_C << 3 | SA_TIL | rpl;
-
 		p->regs.ds =
-
 			p->regs.es =
-
 			p->regs.fs =
-
 			p->regs.ss = INDEX_LDT_RW << 3 | SA_TIL | rpl;
 
 		p->regs.gs = (SELECTOR_KERNEL_GS & SA_RPL_MASK) | rpl;
-
 		p->regs.eip = (u32)t->initial_eip;
-
 		p->regs.esp = (u32)stk;
-
 		p->regs.eflags = eflags;
 
-
-
 		p->ticks = p->priority = prio;
-
-
-
 		p->p_flags = 0;
-
 		p->p_msg = 0;
-
 		p->p_recvfrom = NO_TASK;
-
 		p->p_sendto = NO_TASK;
-
 		p->has_int_msg = 0;
-
 		p->q_sending = 0;
-
 		p->next_sending = 0;
 
-
-
 		for (j = 0; j < NR_FILES; j++)
-
 			p->filp[j] = 0;
 
-
-
 		stk -= t->stacksize;
-
 	}
 
-
-
 	k_reenter = 0;
-
 	ticks = 0;
-
-
 
 	p_proc_ready = proc_table;
 
-
-
 	init_clock();
-
 	init_keyboard();
-
-
 
 	restart();
 
-
-
 	while (1) {}
-
 }
 
 
@@ -474,17 +372,15 @@ PUBLIC void panic(const char *fmt, ...)
 }
 
 /*****************************************************************************
-*                                shabby_shell
+*                                wx_shell
 *****************************************************************************/
 /**
-* A very simple shell.
+* A very powerful shell.
 *
 * @param tty_name  TTY file name.
 *****************************************************************************/
 void shabby_shell(const char * tty_name)
 {
-
-
 	int fd_stdin = open(tty_name, O_RDWR);
 	assert(fd_stdin == 0);
 	int fd_stdout = open(tty_name, O_RDWR);
@@ -496,7 +392,7 @@ void shabby_shell(const char * tty_name)
 	char arg2[MAX_FILENAME_LEN];
 	char filepath[MAX_FILENAME_LEN];
 
-	colorful();
+	animation();
 	clear();
 	welcome();
 
@@ -568,32 +464,38 @@ void shabby_shell(const char * tty_name)
 				{
 					welcome();
 				}
+
 				/* clear screen */
 				else if (strcmp(cmd, "clear") == 0)
 				{
 					clear();
 					welcome();
 				}
-				/* show process */
+
+				/* show process*/
 				else if (strcmp(cmd, "proc") == 0)
 				{
 					showProcess();
 				}
+
 				// kill a process
 				else if (strcmp(cmd, "kill") == 0)
 				{
 					// printf("Process killed successfullly, pid: %s\n", arg1);
 					killProcess(arg1);
 				}
+
 				else if (strcmp(cmd, "mkpro") == 0)
 				{
 					makeProcess(arg1);
 				}
+
 				/* show help message */
 				else if (strcmp(cmd, "help") == 0)
 				{
 					help();
 				}
+
 				/* create a file */
 				else if (strcmp(cmd, "mkfile") == 0)
 				{
@@ -609,6 +511,7 @@ void shabby_shell(const char * tty_name)
 					createFile(filepath, arg1, arg2);
 					memset(filepath, 0, MAX_FILENAME_LEN);
 				}
+
 				/* create a dir */
 				else if (strcmp(cmd, "mkdir") == 0)
 				{
@@ -623,6 +526,7 @@ void shabby_shell(const char * tty_name)
 					createDir(filepath, arg1);
 					memset(filepath, 0, MAX_FILENAME_LEN);
 				}
+
 				/* read a file */
 				else if (strcmp(cmd, "read") == 0)
 				{
@@ -634,6 +538,7 @@ void shabby_shell(const char * tty_name)
 					readFile(arg1);
 					memset(filepath, 0, MAX_FILENAME_LEN);
 				}
+
 				/* edit a file cover */
 				else if (strcmp(cmd, "edit") == 0)
 				{
@@ -647,6 +552,7 @@ void shabby_shell(const char * tty_name)
 					editCover(filepath, arg2);
 					memset(filepath, 0, MAX_FILENAME_LEN);
 				}
+
 				/* edit a file appand */
 				else if (strcmp(cmd, "edit+") == 0)
 				{
@@ -660,6 +566,7 @@ void shabby_shell(const char * tty_name)
 					editAppand(filepath, arg2);
 					memset(filepath, 0, MAX_FILENAME_LEN);
 				}
+
 				/* delete a file */
 				else if (strcmp(cmd, "delete") == 0)
 				{
@@ -673,6 +580,7 @@ void shabby_shell(const char * tty_name)
 					deleteFile(filepath);
 					memset(filepath, 0, MAX_FILENAME_LEN);
 				}
+
 				/* delete a directory */
 				else if (strcmp(cmd, "deletedir") == 0)
 				{
@@ -686,11 +594,13 @@ void shabby_shell(const char * tty_name)
 					deleteDir(filepath);
 					memset(filepath, 0, MAX_FILENAME_LEN);
 				}
+
 				/* ls */
 				else if (strcmp(cmd, "ls") == 0)
 				{
 					ls();
 				}
+
 				/* cd */
 				else if (strcmp(cmd, "cd") == 0)
 				{
@@ -708,23 +618,19 @@ void shabby_shell(const char * tty_name)
 						cd(arg1);
 					}
 				}
+
+				/* information */
 				else if (strcmp(cmd, "information") == 0)
-
 				{
-
 					information();
-
 				}
 
 				/* print */
-
 				else if (strcmp(cmd, "print") == 0)
-
 				{
-
 					printf("%s\n", arg1);
-
 				}
+
 				else
 				{
 					printf("Command not found\n");
@@ -763,7 +669,14 @@ void welcome()
 	printf("   oooo    oooo  ooo   ooo   ooo     ooo  ooo    ooooo  oooo    ooo  ooo     \n");
 	printf("     oooooooo    ooo    ooo ooo      ooo  ooo     oooo    oooooooo   oooooooo\n");
 	printf("=============================================================================\n");
-	printf("\n\n\n\n\n\n\n\n\n\n\n");
+	printf("=                     Welcome to our Operating System                       =\n");
+	printf("=============================================================================\n");
+	printf("=                                                                           =\n");
+	printf("=                          1652677    Wu Tongxin                            =\n");
+	printf("=                          1652695    Wen Yue                               =\n");
+	printf("=                                                                           =\n");
+	printf("=============================================================================\n");
+	printf("\n\n\n\n\n\n");
 }
 
 /*****************************************************************************
@@ -920,9 +833,9 @@ void help()
 }
 
 /*****************************************************************************
-*								Colorful
+*								animation
 *****************************************************************************/
-void colorful()
+void animation()
 {
 	int j = 0;
 	for (j = 0; j < 2800; j++) { disp_str(" "); }
@@ -964,7 +877,7 @@ void colorful()
 		disp_color_str("oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo", BLUE);
 	for (j = 0; j < 300; j++)
 		disp_str(" ");
-	milli_delay(80000);
+	milli_delay(30000);
 
 }
 /*****************************************************************************
@@ -984,8 +897,6 @@ void information()
 	printf(" MMBUF_SIZE:%dMB\n", MMBUF_SIZE / (1024 * 1024));
 
 	printf(" FSBUF_SIZE:%dMB\n", FSBUF_SIZE / (1024 * 1024));
-
-
 
 }
 /*****************************************************************************
