@@ -8,10 +8,9 @@ int main(int argc, char * argv[]){
 	printf("              ***************************************************\n");
 	printf("              *             Please choice the game              *\n");
 	printf("              *                   1.Gobang                      *\n");
-	printf("              *                   2.Calculator                  *\n");
-	printf("              *                   3.ic-tac-toe                  *\n");
-	printf("              *                   4.Guess number                *\n");
-	printf("              *                   5.N queen game                *\n");
+	printf("              *                   2.ic-tac-toe                  *\n");
+	printf("              *                   3.Guess number                *\n");
+	printf("              *                   4.N queen game                *\n");
 	printf("              *                 Enter e to quit                 *\n");
 	printf("              ***************************************************\n\n");
 	
@@ -20,12 +19,10 @@ int main(int argc, char * argv[]){
 	if('1' == bur[0])
 		Gobang();
 	if('2' == bur[0])
-		calculator();
-	if('3' == bur[0])
 		ic();
-	if('4' == bur[0])
+	if('3' == bur[0])
 		guess();
-	if('5' == bur[0])
+	if('4' == bur[0])
 		queen();
 	if('e' == bur[0])
 		break;
@@ -492,37 +489,4 @@ int judge(int x, int y)
 	}
 
 	return 0;
-}
-
-
-
-/***************************calculator*********************************/
-
-void calculator()
-{
-	printf("              ***************************************************\n");
-	printf("              *               Calculator                        *\n");
-	printf("              ***************************************************\n");
-	printf("              *             only for two interger               *\n");
-	printf("              *               example: 1+1                      *\n");
-	printf("              *               Enter e to quit                   *\n");
-	printf("              ***************************************************\n\n");
-
-	while(1){	
-		char result;
-		char bufr[128];
-		read(0, bufr, 128);
-
-		switch(bufr[1])
-		{
-    		case '+':result=chartonumber(bufr[0])+chartonumber(bufr[2]);break;
-			case '-':result=chartonumber(bufr[0])-chartonumber(bufr[2]);break;
-			case '*':result=chartonumber(bufr[0])*chartonumber(bufr[2]);break;
-			case '/':result=chartonumber(bufr[0])/chartonumber(bufr[2]);break;
-		}
-		if(bufr[0]=='e')
-			break;
-		else
-			printf("%d %c %d = %d\n",chartonumber(bufr[0]),bufr[1],chartonumber(bufr[2]),result);
-	}
 }
