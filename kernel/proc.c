@@ -352,7 +352,9 @@ PRIVATE int msg_receive(struct proc* current, int src, MESSAGE* m)
 		reset_msg(&msg);
 		msg.source = INTERRUPT;
 		msg.type = HARD_INT;
+
 		assert(m);
+
 		phys_copy(va2la(proc2pid(p_who_wanna_recv), m), &msg,
 			  sizeof(MESSAGE));
 
@@ -388,7 +390,7 @@ PRIVATE int msg_receive(struct proc* current, int src, MESSAGE* m)
 			assert(p_from->p_sendto == proc2pid(p_who_wanna_recv));
 		}
 	}
-	else {
+	else if (src >= 0 && src < NR_TASKS + NR_PROCS) {
 		/* p_who_wanna_recv wants to receive a message from
 		 * a certain proc: src.
 		 */
@@ -402,15 +404,17 @@ PRIVATE int msg_receive(struct proc* current, int src, MESSAGE* m)
 			copyok = 1;
 
 			struct proc* p = p_who_wanna_recv->q_sending;
+
 			assert(p); /* p_from must have been appended to the
 				    * queue, so the queue must not be NULL
 				    */
+
 			while (p) {
 				assert(p_from->p_flags & SENDING);
-				if (proc2pid(p) == src) { /* if p is the one */
-					p_from = p;
+
+				if (proc2pid(p) == src) /* if p is the one */
 					break;
-				}
+
 				prev = p;
 				p = p->next_sending;
 			}
@@ -446,6 +450,7 @@ PRIVATE int msg_receive(struct proc* current, int src, MESSAGE* m)
 
 		assert(m);
 		assert(p_from->p_msg);
+
 		/* copy the message */
 		phys_copy(va2la(proc2pid(p_who_wanna_recv), m),
 			  va2la(proc2pid(p_from), p_from->p_msg),
@@ -463,12 +468,7 @@ PRIVATE int msg_receive(struct proc* current, int src, MESSAGE* m)
 		p_who_wanna_recv->p_flags |= RECEIVING;
 
 		p_who_wanna_recv->p_msg = m;
-
-		if (src == ANY)
-			p_who_wanna_recv->p_recvfrom = ANY;
-		else
-			p_who_wanna_recv->p_recvfrom = proc2pid(p_from);
-
+		p_who_wanna_recv->p_recvfrom = src;
 		block(p_who_wanna_recv);
 
 		assert(p_who_wanna_recv->p_flags == RECEIVING);
