@@ -54,6 +54,7 @@ struct mess3 {
 typedef struct {
 	int source;
 	int type;
+	char content[128];
 	union {
 		struct mess1 m1;
 		struct mess2 m2;
@@ -66,6 +67,7 @@ struct boot_params {
 	int		mem_size;	/* memory size */
 	unsigned char *	kernel_file;	/* addr of kernel file */
 };
+
 
 
 #endif /* _ORANGES_TYPE_H_ */

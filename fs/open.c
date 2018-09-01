@@ -78,7 +78,7 @@ PUBLIC int do_open()
 	if (flags & O_CREAT) {
 		if (inode_nr) {
 			printl("{FS} file exists.\n");
-			return -1;
+			return -2;
 		}
 		else {
 			pin = create_file(pathname, flags);

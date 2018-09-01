@@ -153,6 +153,39 @@ PUBLIC char * strcat(char * s1, const char *s2)
 }
 
 /*****************************************************************************
+*                                strjin
+*****************************************************************************/
+/**
+* Concatenate two strings with a char.
+*
+* @param s1  The 1st string.
+* @param s2  The 2nd string.
+* @param ch	 The join char
+*
+* @return  Ptr to the 1st string.
+*****************************************************************************/
+PUBLIC char * strjin(char * s1, const char *s2, const char ch)
+{
+	if ((s1 == 0) || (s2 == 0)) { /* for robustness */
+		return 0;
+	}
+
+	char * p1 = s1;
+	for (; *p1; p1++) {}
+
+	*p1 = ch;
+	p1++;
+
+	char * p2 = s2;
+	for (; *p2; p1++, p2++) {
+		*p1 = *p2;
+	}
+	*p1 = 0;
+
+	return s1;
+}
+
+/*****************************************************************************
  *                                spin
  *****************************************************************************/
 PUBLIC void spin(char * func_name)
