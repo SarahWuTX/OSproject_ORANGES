@@ -160,7 +160,7 @@ PUBLIC char * strcat(char * s1, const char *s2)
 *
 * @param s1  The 1st string.
 * @param s2  The 2nd string.
-* @param ch	 The join char
+* @param ch  The join char
 *
 * @return  Ptr to the 1st string.
 *****************************************************************************/
@@ -183,6 +183,29 @@ PUBLIC char * strjin(char * s1, const char *s2, const char ch)
 	*p1 = 0;
 
 	return s1;
+}
+
+/*****************************************************************************
+*                                strrpl
+*****************************************************************************/
+/**
+* Replace a char for another char in a string
+*
+* @param s      The string.
+* @param out    The char to be replaced.
+* @param in	The target char.
+*
+* @return  	Ptr to the new string.
+*****************************************************************************/
+PUBLIC char * strrpl(char * s, char out, char in)
+{
+	char * i = s;
+	while(*i){
+		if(*i == out)
+			*i = in;
+		i++;
+	}
+	return s;
 }
 
 /*****************************************************************************

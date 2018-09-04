@@ -42,6 +42,6 @@ PUBLIC int open(const char *pathname, int flags)
 
 	send_recv(BOTH, TASK_FS, &msg);
 	assert(msg.type == SYSCALL_RET);
-
+	//printl("finish open(%s)fd=%d\n",pathname,msg.FD);
 	return msg.FD;
 }

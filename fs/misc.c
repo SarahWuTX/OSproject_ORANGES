@@ -95,6 +95,7 @@ PUBLIC int do_stat()
 PUBLIC int search_file(char * path)
 {
 	int i, j;
+	//printl("search_file(%s)\n",path);
 
 	char filename[MAX_PATH];
 	memset(filename, 0, MAX_FILENAME_LEN);

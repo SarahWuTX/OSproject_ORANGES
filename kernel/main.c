@@ -17,13 +17,13 @@ main.c
 #include "global.h"
 #include "proto.h"
 
-#define	MAX_USER		10
+#define	MAX_USER		2
 #define	MAX_USER_FILE	100
-#define MAX_USER_DIR	5
+#define MAX_USER_DIR	16
 #define	MAX_PSWD_LEN	12
 
 #define	MAX_FILES		80
-#define	MAX_DIRS		50
+#define	MAX_DIRS		32
 
 
 char location[MAX_FILENAME_LEN] = "root";
@@ -35,7 +35,20 @@ int  dirqueue[MAX_FILES];
 int  dircount = 0;
 
 void shabby_shell(const char * tty_name);
+/*****************************************/
+int checkFilename(const char * arg1);
+int updateDir(char * filename, int op);
+void getFullname(char * fullname, char * filename);
 
+int miniRead(char * fullname, char * buf);
+int miniWrite(char * fullname, char * buf);
+void truncateFile(char * filename);
+void extendFile(char * filename);
+void rewriteFile(char * filename);
+
+int dirmap[MAX_DIRS];
+char dir[MAX_DIRS][MAX_FILENAME_LEN];
+/*****************************************/
 int isDir(const char * filepath);
 
 void getFilepath(char *filepath, char * filename);
@@ -57,17 +70,15 @@ void showProcess();
 void killProcess();
 void makeProcess();
 void help();
-void animation();
-void createFile(char * filepath, char *filename, char * buf);
-void createDir(char * filepath, char *filename);
+void createFile(char *filename, char * buf);
+void createDir(char *filename);
 void readFile(char * filename);
 void editAppand(const char * filepath, char * str);
 void editCover(const char * filepath, char * str);
 void deleteFile(char * filepath);
 void deleteDir(char * filepath);
 void ls();
-void cd(char * dirname);
-void cdback();
+void cd(char * arg1);
 
 
 
@@ -301,7 +312,7 @@ void Init()
 
 	/* extract `cmd.tar' */
 	untar("/cmd.tar");
-
+	//spin("a");
 
 	char * tty_list[] = { "/dev_tty0" };
 
@@ -330,7 +341,7 @@ void Init()
 
 
 /*======================================================================*
-TestA
+				TestA
 *======================================================================*/
 void TestA()
 {
@@ -338,7 +349,7 @@ void TestA()
 }
 
 /*======================================================================*
-TestB
+				TestB
 *======================================================================*/
 void TestB()
 {
@@ -346,7 +357,7 @@ void TestB()
 }
 
 /*======================================================================*
-TestB
+				TestC
 *======================================================================*/
 void TestC()
 {
@@ -372,10 +383,10 @@ PUBLIC void panic(const char *fmt, ...)
 }
 
 /*****************************************************************************
-*                                wx_shell
+*                                shabby_shell
 *****************************************************************************/
 /**
-* A very powerful shell.
+* A very simple shell.
 *
 * @param tty_name  TTY file name.
 *****************************************************************************/
@@ -386,13 +397,14 @@ void shabby_shell(const char * tty_name)
 	int fd_stdout = open(tty_name, O_RDWR);
 	assert(fd_stdout == 1);
 
-	char rdbuf[128];
-	char cmd[128];
+	char rdbuf[256];
+	char cmd[64];
 	char arg1[MAX_FILENAME_LEN];
 	char arg2[MAX_FILENAME_LEN];
 	char filepath[MAX_FILENAME_LEN];
+	char username[MAX_FILENAME_LEN]="User";
+	char locat[MAX_FILENAME_LEN]="root";
 
-	animation();
 	clear();
 	welcome();
 
@@ -400,13 +412,13 @@ void shabby_shell(const char * tty_name)
 
 	while (1) {
 
-		memset(rdbuf, 0, 128);
-		memset(cmd, 0, 128);
+		memset(rdbuf, 0, 256);
+		memset(cmd, 0, 64);
 		memset(arg1, 0, MAX_FILENAME_LEN);
 		memset(arg2, 0, MAX_FILENAME_LEN);
 
-		printf("%s $ ", location);
-		int r = read(0, rdbuf, 70);
+		printf("%s@Bochs: %s$ ", username, location);
+		int r = read(0, rdbuf, 256);
 		rdbuf[r] = 0;
 
 
@@ -430,8 +442,11 @@ void shabby_shell(const char * tty_name)
 			p++;
 		} while (ch);
 		argv[argc] = 0;
-
-		int fd = open(argv[0], O_RDWR);
+		int fd=-1;
+		if(strcmp(argv[0],"game")== 0 || strcmp(argv[0],"calculator")== 0 || strcmp(argv[0],"calendar")== 0)
+		{
+			fd = open(argv[0], O_RDWR);
+		}
 		if (fd == -1) {
 			if (rdbuf[0]) {
 				int i = 0, j = 0;
@@ -469,7 +484,6 @@ void shabby_shell(const char * tty_name)
 				else if (strcmp(cmd, "clear") == 0)
 				{
 					clear();
-					welcome();
 				}
 
 				/* show process*/
@@ -478,13 +492,14 @@ void shabby_shell(const char * tty_name)
 					showProcess();
 				}
 
-				// kill a process
+				/* kill a process */
 				else if (strcmp(cmd, "kill") == 0)
 				{
 					// printf("Process killed successfullly, pid: %s\n", arg1);
 					killProcess(arg1);
 				}
 
+				/* make a new process */
 				else if (strcmp(cmd, "mkpro") == 0)
 				{
 					makeProcess(arg1);
@@ -499,96 +514,64 @@ void shabby_shell(const char * tty_name)
 				/* create a file */
 				else if (strcmp(cmd, "mkfile") == 0)
 				{
-					if (arg1[0] == '#')
-					{
-						printf("Irregular filename!");
-						continue;
-					}
-
-					strcpy(filepath, location);
-					getFilepath(filepath, arg1);
-					printf("%s  %s\n", arg1, arg2);
-					createFile(filepath, arg1, arg2);
-					memset(filepath, 0, MAX_FILENAME_LEN);
+					if(checkFilename(arg1)==0)continue;
+					createFile(arg1, arg2);
 				}
 
-				/* create a dir */
+				/* create a directory */
 				else if (strcmp(cmd, "mkdir") == 0)
 				{
-					if (arg1[0] == '#')
-					{
-						printf("Irregular dirname!");
-						continue;
-					}
-
-					strcpy(filepath, location);
-					getDirFilepath(filepath, arg1);
-					createDir(filepath, arg1);
-					memset(filepath, 0, MAX_FILENAME_LEN);
+					if(checkFilename(arg1)==0)continue;
+					createDir(arg1);
 				}
 
 				/* read a file */
 				else if (strcmp(cmd, "read") == 0)
 				{
-					if (arg1[0] == '#')
-					{
-						printf("Irregular filename!");
-						continue;
-					}
+					if(checkFilename(arg1)==0)continue;
 					readFile(arg1);
-					memset(filepath, 0, MAX_FILENAME_LEN);
 				}
 
 				/* edit a file cover */
 				else if (strcmp(cmd, "edit") == 0)
 				{
-					if (arg1[0] == '#')
+					if(checkFilename(arg2)==0)continue;
+
+					if(strcmp(arg1, "-ad") == 0)
 					{
-						printf("Irregular filename!");
-						continue;
+						readFile(arg2);
+						extendFile(arg2);
 					}
-					strcpy(filepath, location);
-					getFilepath(filepath, arg1);
-					editCover(filepath, arg2);
-					memset(filepath, 0, MAX_FILENAME_LEN);
+					else if(strcmp(arg1, "-rw") == 0)
+					{
+						readFile(arg2);
+						rewriteFile(arg2);
+					}
+					else if(strcmp(arg1, "-tr") == 0)
+					{
+						truncateFile(arg2);
+					}
+					else
+					{
+						printf("Command not found\n");
+					}
+					
 				}
 
-				/* edit a file appand */
-				else if (strcmp(cmd, "edit+") == 0)
+				/* remove a file */
+				else if (strcmp(cmd, "rm") == 0)
 				{
-					if (arg1[0] == '#')
-					{
-						printf("Irregular filename!");
-						continue;
-					}
-					strcpy(filepath, location);
-					getFilepath(filepath, arg1);
-					editAppand(filepath, arg2);
+					if(checkFilename(arg1)==0)continue;
+
+					deleteFile(arg1);
 					memset(filepath, 0, MAX_FILENAME_LEN);
 				}
 
-				/* delete a file */
-				else if (strcmp(cmd, "delete") == 0)
-				{
-					if (arg1[0] == '#')
-					{
-						printf("Irregular filename!");
-						continue;
-					}
-					strcpy(filepath, location);
-					getFilepath(filepath, arg1);
-					deleteFile(filepath);
-					memset(filepath, 0, MAX_FILENAME_LEN);
-				}
-
-				/* delete a directory */
+				/* remove a directory */
 				else if (strcmp(cmd, "deletedir") == 0)
 				{
-					if (arg1[0] == '#')
-					{
-						printf("Irregular filename!");
-						continue;
-					}
+					if(checkFilename(arg1)==0)continue;
+
 					strcpy(filepath, location);
 					getDirFilepath(filepath, arg1);
 					deleteDir(filepath);
@@ -604,19 +587,7 @@ void shabby_shell(const char * tty_name)
 				/* cd */
 				else if (strcmp(cmd, "cd") == 0)
 				{
-					if (arg1[0] == '#')
-					{
-						printf("Irregular filename!");
-						continue;
-					}
-					else if (strcmp(arg1, "..") == 0)
-					{
-						cdback();
-					}
-					else
-					{
-						cd(arg1);
-					}
+					cd(arg1);
 				}
 
 				/* information */
@@ -653,30 +624,70 @@ void shabby_shell(const char * tty_name)
 	close(1);
 	close(0);
 }
+/*****************************************************************************
+/*					        checkFilename
+*****************************************************************************/
+int checkFilename(const char * arg1)
+{
+	int n = strlen(arg1);
+	//printf("checking......n=%d......checking......\n",n);
+	if(n>MAX_FILENAME_LEN)
+	{
+		printf("Please use a shorter filename\n");
+		return 0;
+	}
+	if(n<=0)
+	{
+		printf("Filename cannot be empty\n");
+		return 0;
+	}
+	char ch;
+	for(int i=0;i<n;i++){
+		ch = *(arg1+i);
+		//printf("checking......ch=%c......checking......\n",ch);
+		if(ch=='/' || ch=='.' || ch==' ' || ch=='#')
+		{
+			printf("Filename cannot contain \'#\'\'.\'\'/\'\' \'\n");
+			return 0;
+		}
+	}
+	
+	return 1;
+}
 
+/*****************************************************************************
+/*					        getFullname
+*****************************************************************************/
+void getFullname(char * fullname, char * filename)
+{
+	memset(fullname, 0, MAX_FILENAME_LEN);
+	strcpy(fullname, location);
+	//printf("fullname:%s\n",fullname);
+	strcat(fullname, "/");
+	strcat(fullname, filename);
+	//printf("fullname:%s\n",fullname);
+	strrpl(fullname, '/', '_');
+	//printf("fullname:%s\n",fullname);
+}
 /*****************************************************************************
 *								Welcome
 *****************************************************************************/
 void welcome()
 {
 
-	printf("=============================================================================\n");
-	printf("       ooooo     ooooooo         ooo      oooo     ooo      ooooo    oooooooo\n");
-	printf("    oooo  oooo   ooo  oooo      ooooo     ooooo    ooo   ooooo  ooo  ooo     \n");
-	printf("   ooo      ooo  ooo   ooo      oo ooo    oooooo   ooo  ooo          ooo     \n");
-	printf("   ooo      ooo  oooooooo      oo   ooo   ooo oooo ooo  ooo  oooooo  oooooooo\n");
-	printf("   ooo      ooo  ooo oooo     ooooooooo   ooo   oooooo  ooo     ooo  ooo     \n");
-	printf("   oooo    oooo  ooo   ooo   ooo     ooo  ooo    ooooo  oooo    ooo  ooo     \n");
-	printf("     oooooooo    ooo    ooo ooo      ooo  ooo     oooo    oooooooo   oooooooo\n");
-	printf("=============================================================================\n");
-	printf("=                     Welcome to our Operating System                       =\n");
-	printf("=============================================================================\n");
-	printf("=                                                                           =\n");
-	printf("=                          1652677    Wu Tongxin                            =\n");
-	printf("=                          1652695    Wen Yue                               =\n");
-	printf("=                                                                           =\n");
-	printf("=============================================================================\n");
-	printf("\n\n\n\n\n\n");
+	printf(" =============================================================================\n");
+	printf(" =                                                                           =\n");
+	printf(" =                     Welcome to our Operating System                       =\n");
+	printf(" =                                                                           =\n");
+	printf(" =                       +-------------------------+                         =\n");
+	printf(" =                       |  1652677    Wu Tongxin  |                         =\n");
+	printf(" =                       |  1652695    Wen Yue     |                         =\n");
+	printf(" =                       +-------------------------+                         =\n");
+	printf(" =                                                                           =\n");
+	printf(" =============================================================================\n");
+	printf(" =                          HELP - List all commands                         =\n");
+	printf(" =============================================================================\n");
+	printf("\n\n\n\n");
 }
 
 /*****************************************************************************
@@ -696,21 +707,6 @@ void off()
 {
 	return 0;
 }
-// /*****************************************************************************
-// *							  Show Process
-// *****************************************************************************/
-// void showProcess()
-// {
-// 	int i = 0;
-// 	printf("********************************************************************************\n");
-// 	printf("        name        |        priority        |        f_flags(0 is runable)        \n");
-// 	printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-// 	for (i = 0; i < NR_TASKS + NR_PROCS; i++)
-// 	{
-// 		printf("        %s                   %d                      %d\n", proc_table[i].name, proc_table[i].priority, proc_table[i].p_flags);
-// 	}
-// 	printf("********************************************************************************\n");
-// }
 
 /*****************************************************************************
 *							  Show Process
@@ -812,74 +808,33 @@ void makeProcess(char str[])
 void help()
 {
 	printf("===============================================================================\n");
-	printf("        name                   |                      function                      \n");
-	printf("===============================================================================\n");
-	printf("        welcome                |       Welcome the users\n");
-	printf("        clear                  |       Clean the screen\n");
-	printf("        ls                     |       List all files in current file path\n");
-	printf("        help                   |       List all commands\n");
-	printf("        proc                   |       List all process's message\n");
-	printf("        kill   [id]            |       kill a process with this pid\n");
-	printf("        mkpro  [name]          |       folk and start a new process\n");
-	printf("        mkdir  [name]          |       Create a directory\n");
-	printf("        mkfile [file][str]     |       Create a file\n");
-	printf("        read   [file]          |       Read a file\n");
-	printf("        delete [file]          |       Delete a file\n");
-	printf("        deletedir [file]       |       Delete a directory\n");
-	printf("        edit   [file][str]     |       Edit file, cover the content\n");
-	printf("        edit+  [file][str]     |       Edit file, appand after the content\n");
+	printf("=       Command                        Description                            =\n");
+	printf("=-----------------------------------------------------------------------------=\n");
+	printf("=       welcome                        Print welcome page                     =\n");
+	printf("=       clear                          Clean the screen                       =\n");
+	printf("=       cd       [path]                Get into the path                      =\n");
+	printf("=       ls                             List all the files in current directory=\n");
+	printf("=       help                           List all commands                      =\n");
+	//printf("=       proc                           List all process's message             =\n");
+	//printf("=       kill   [id]                    Kill a process with this pid           =\n");
+	//printf("=       mkpro  [name]                  Folk and start a new process           =\n");
+	printf("=       mkdir    [name]                Create a directory                     =\n");
+	printf("=       mkfile   [file] [content]      Create a textfile                      =\n");
+	printf("=       read     [file]                Read a file                            =\n");
+	printf("=       rm       [file]                Delete a file                          =\n");
+	//printf("=       deletedir[file]               Delete a directory                     =\n");
+	printf("=       edit     -ad    [filename]     Edit file, add content behind          =\n");
+	printf("=       edit     -rw    [filename]     Edit file, rewrite/cover the file      =\n");
+	printf("=       edit     -tr    [filename]     Truncate the file                      =\n");
+    printf("=       calendar                       Print calendar                         =\n");
+    printf("=       clear                          Clean the screen                       =\n");
+    printf("=       calculator                     Use calculator                         =\n");
+    printf("=       game                           Play games                             =\n");
 	printf("===============================================================================\n");
 
 }
 
-/*****************************************************************************
-*								animation
-*****************************************************************************/
-void animation()
-{
-	int j = 0;
-	for (j = 0; j < 2800; j++) { disp_str(" "); }
-	disp_color_str("                       oo", YELLOW);
-	disp_color_str("oooooooooooo", LIGHT);
-	disp_color_str("oooo", LIGHT);
-	disp_color_str("oooooooooo", LIGHT);
-	disp_color_str("oo                   \n", YELLOW);
-	disp_color_str("                       oo", YELLOW);
-	disp_color_str("oooooooooooooooooooooooooo", LIGHT);
-	disp_color_str("oo                   \n", YELLOW);
-	disp_color_str("                        oo", YELLOW);
-	disp_color_str("oooooooooooooooooooooooo", LIGHT);
-	disp_color_str("oo                   \n", YELLOW);
-	disp_color_str("                         oo", YELLOW);
-	disp_color_str("oooooooooooooooooooooo", LIGHT);
-	disp_color_str("oo                    \n", YELLOW);
-	disp_color_str("                          oo", YELLOW);
-	disp_color_str("ooooooooooooooooooooo", LIGHT);
-	disp_color_str("o                      \n", YELLOW);
-	disp_color_str("                           oo", YELLOW);
-	disp_color_str("ooooooooooooooooo", LIGHT);
-	disp_color_str("oo                       \n", YELLOW);
-	disp_color_str("                             oo", YELLOW);
-	disp_color_str("ooooooooooooo", LIGHT);
-	disp_color_str("oo                          \n", YELLOW);
-	disp_color_str("                               ooooooooooooo                              \n", YELLOW);
-	for (j = 0; j < 3; j++)
-		disp_color_str("oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo", BLUE);
-	disp_color_str("        ooooo     ooooooo         ooo      oooo     ooo      ooooo    oooooooo\n", RED);
-	disp_color_str("     oooo  oooo   ooo  oooo      ooooo     ooooo    ooo   ooooo  ooo  ooo     \n", RED);
-	disp_color_str("    ooo      ooo  ooo   ooo      oo ooo    oooooo   ooo  ooo          ooo     \n", RED);
-	disp_color_str("    ooo      ooo  oooooooo      oo   ooo   ooo oooo ooo  ooo  oooooo  oooooooo\n", RED);
-	disp_color_str("    ooo      ooo  ooo oooo     ooooooooo   ooo   oooooo  ooo     ooo  ooo     \n", RED);
-	disp_color_str("    oooo    oooo  ooo   ooo   ooo     ooo  ooo    ooooo  oooo    ooo  ooo     \n", RED);
-	disp_color_str("      oooooooo    ooo    ooo ooo      ooo  ooo     oooo    oooooooo   oooooooo\n", RED);
 
-	for (j = 0; j < 3; j++)
-		disp_color_str("oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo", BLUE);
-	for (j = 0; j < 300; j++)
-		disp_str(" ");
-	milli_delay(30000);
-
-}
 /*****************************************************************************
 
 *								Information
@@ -916,71 +871,36 @@ void initFS()
 
 	memset(filequeue, 0, MAX_FILES);
 	memset(dirqueue, 0, MAX_DIRS);
-
+	
 	fd = open("root", O_CREAT | O_RDWR);
+	//printf("fd=%d\n",fd);
 	close(fd);
 
 	fd = open("root", O_RDWR);
+	for(int i=0;i<1024;i++){
+		bufr[i]=0;
+	}
 	write(fd, bufr, 1024);
 	close(fd);
-
-	/*fd = open("root", O_RDWR);
-	n = read(fd, bufr, 1024);
-	close(fd);
-
-	int i, k;
-	for (i = 0, k = 0; i < n; i++)
-	{
-
-		if (bufr[i] != ' ')
-		{
-			filepath[k] = bufr[i];
-			k++;
-		}
-		else
-		{
-			while (bufr[i] == ' ')
-				i++;
-
-			if (strcmp(filepath, "") == 0)
-				continue;
-
-			getDirpathAndFilename(dirpath, filename, filepath);
-			if (filename[0] == '#')
-			{
-				strcpy(dirs[dircount], filepath);
-				dirqueue[dircount] = 1;
-				dircount++;
-			}
-			else
-			{
-				strcpy(dirs[dircount], filepath);
-				filequeue[filecount] = 1;
-				filecount++;
-			}
-
-			fd = open(filepath, O_CREAT | O_RDWR);
-			close(fd);
-
-			k = 0;
-
-			if (bufr[i] == 0)
-				break;
-
-			i--;
-		}
-	}*/
+	
+	memset(dirmap, 0, MAX_DIRS);
+	for(int i=0;i<MAX_DIRS;i++){
+		dirmap[i]=0;
+		strcpy(dir[i], "");
+	}
+	dirmap[0]=1;
+	strcpy(dir[0], "root");
 }
 
 /*****************************************************************************
-*							Identity a Directory
+*							 isDir
+*return 1 if it is a directory, otherwise 0
 *****************************************************************************/
-int isDir(const char * filepath)
+int isDir(const char * dirpath)
 {
-	int pos = getPosInDirQueue(filepath);
-	if (pos != -1)
-	{
-		return 1;
+	for(int i=0;i<MAX_DIRS;i++){
+		if(strcmp(dir[i], dirpath)==0)
+			return 1;
 	}
 	return 0;
 }
@@ -1160,65 +1080,206 @@ void deleteFileFromDir(const char * dirpath, char * filename)
 /*****************************************************************************
 *							 Create File
 *****************************************************************************/
-void createFile(char * filepath, char *filename, char * buf)
+void createFile(char * filename, char * buf)
 {
-	int fd = -1, pos = -1;
-	
-	fd = open(filepath, O_CREAT | O_RDWR);
-	printf("file name: %s\n content: %s\n", filename, buf);
+	/* create & open new file */
+	int fd = -1;//, pos = -1;
+	char fullname[MAX_FILENAME_LEN];
+	getFullname(fullname, filename);
+	fd = open(fullname, O_CREAT | O_RDWR);
+	////////////////////////////////
+	printf("fullname: %s\nfilename: %s\n content: %s\n", fullname, filename, buf);
+	///////////////////////////////
 	if (fd == -1)
 	{
-		printf("New file failed. Please check and try again!!\n");
+		printf("Oops! Internal error!\n");
 		return;
 	}
 	else if (fd == -2)
 	{
-		printf("File already exist!!\n");
+		printf("File \'%s\' exists!\n",filename);
 		return;
 	}
 
-	write(fd, buf, strlen(buf));
+	/* write file */
+	write(fd, buf, strlen(buf)+1);
+
+	/* close file */
 	close(fd);
 
-	pos = getFreeFilePos();
+	/* update dir */
+	updateDir(filename,1);
+	
+	///////////////////////////////////////
+/*	pos = getFreeFilePos();
 	filequeue[pos] = 1;
 	strcpy(files[pos], filepath);
 	filecount++;
 
-	addFileIntoDir(location, filename);
+	addFileIntoDir(location, filename);*/
 }
+/*****************************************************************************
+*							 Update Directory
+*****************************************************************************?
+/*
+*@param	filename	
+*@param op		ADD(1),DELETE(2)
+*
+*return Zero if success, otherwise -1
+*****************************************************************************/
+int updateDir(char * filename, int op)
+{
+	/* get full path of dir */
+	char * dirpath;
+	strcpy(dirpath, location);
+	strrpl(dirpath,'/','_');
+////////////////////////////
+	printf("updateDir()dirpath:%s\n",dirpath);
+///////////////////////////////
 
+	/* read dir */
+	char bufr[1024];
+	if(miniRead(dirpath, bufr) != 0)
+	{
+		return -1;
+	}
+/////////////////////
+	printf("before bufr:%s\n",bufr);
+///////////////////
+
+	/* update dir */
+	int namelen = strlen(filename);
+	char temp[MAX_FILENAME_LEN];	/* store the dir name temporally */
+	char * t = temp;	/* pointer of temp */
+	char * it = bufr;	/* pointer of bufr */
+	switch (op) {
+		case 1:/* add new item */
+			strcat(bufr, filename);
+			strcat(bufr, " ");
+			break;
+		case 2:/* delete item */
+			while(*it){
+				if(*it == ' ')
+				{
+					printf("get[%s]target[%s]\n",temp,filename);
+					if(strcmp(filename,temp)==0)
+					{
+						/* found */
+						it++;
+						do {
+							*(it-namelen-1)=*it;
+							it++;
+						}while(*it);
+						break;
+					}
+					/* not found , reset */
+					it++;
+					t = temp;
+					memset(temp, 0, MAX_FILENAME_LEN);
+				}
+				else 
+				{
+					*t++ = *it++;
+				}
+			}
+			break;
+		default:
+			break;
+	}
+
+	
+	miniWrite(dirpath, bufr);
+/////////////////////
+	printf("after bufr:%s\n",bufr);
+///////////////////
+	char bufcheck[1024];
+	miniRead(dirpath, bufcheck);
+/////////////////////
+	printf("now dir:%s\n",bufcheck);
+///////////////////
+	return 0;
+}
 /*****************************************************************************
 *							 Create Directory
 *****************************************************************************/
-void createDir(char * filepath, char *filename)
+void createDir(char * filename)
 {
-	int fd = -1, pos = -1;
+	/* get fullname of dir */
+	char fullname[MAX_FILENAME_LEN];
+	getFullname(fullname, filename);
 
-	fd = open(filepath, O_CREAT | O_RDWR);
-	printf("Folder name: %s\n", filename);
+	/* update global data */
+	/* find a slot in dirmap */
+	int i=0;
+	for(;i<MAX_DIRS;i++){
+		if(dirmap[i]==0)
+			break;
+	}
+	if(i>=MAX_DIRS)	/* {FS} is full */
+	{
+		printf("There is no room for new directory!");
+		return;
+	}
+	/* add item into dir[][] */
+	dirmap[i]=1;
+	strcpy(dir[i], fullname);
+//////////////////////////////////////
+	printf("i=%d,dir[i]=%s,fullname=%s\n",i,dir[i],fullname);
+	printf("*************this is dir list**********\n");
+	for(int j=0;j<MAX_DIRS;j++){
+		if(dirmap[j]==1)
+			printf("pos:%d,%s\n",j,dir[j]);
+////////////////////////////////////
+
+	}
+
+	/* create & open new dir */
+	int fd = -1;
+	//spin("open?");
+	fd = open(fullname, O_CREAT | O_RDWR);
+///////////////////////////////
+	printf("Folder fullname: %s\n", fullname);
+//////////////////////////////
 	if (fd == -1)
 	{
 		printf("New folder failed. Please check and try again!!\n");
+		/* roll back */
+		for(int k=0;k<MAX_DIRS;k++){
+			if(strcmp(dir[k], fullname)==0)
+			{
+				memset(dir[k], 0, MAX_FILENAME_LEN);
+				dirmap[k]=0;
+				break;
+			}
+		}
 		return;
 	}
 	else if (fd == -2)
 	{
-		printf("Folder already exists!!\n");
+		printf("File \'%s\' exists!!\n", filename);
+		/* roll back */
+		for(int k=0;k<MAX_DIRS;k++){
+			printf("dir[k]:%s,fn:%s\n",dir[k], fullname);
+			if(strcmp(dir[k], fullname)==0)
+			{
+				memset(dir[k], 0, MAX_FILENAME_LEN);
+				dirmap[k]=0;
+				break;
+			}
+			printf("yes i ve been here\n");
+		}
 		return;
 	}
+	/* initialize dir */
+	char dirbuf[1024];
+	memset(dirbuf, 0, 1024);
+	write(fd, dirbuf, 1024);
 
+	/* close dir */
 	close(fd);
-
-	pos = getFreeDirPos();
-	dirqueue[pos] = 1;
-	strcpy(dirs[pos], filepath);
-	dircount++;
-
-
-	char str[MAX_FILENAME_LEN] = "#";
-	strcat(str, filename);
-	addFileIntoDir(location, str);
+	
+	/* update dir */
+	updateDir(filename,1);
 }
 
 /*****************************************************************************
@@ -1226,32 +1287,34 @@ void createDir(char * filepath, char *filename)
 *****************************************************************************/
 void readFile(char * filename)
 {
-	char filepath[MAX_FILENAME_LEN];
-	strcpy(filepath, location);
-	getDirFilepath(filepath, filename);
-	if (isDir(filepath))
+	/* check if it is a dir */
+	char fullname[MAX_FILENAME_LEN];
+	getFullname(fullname, filename);
+	if (isDir(fullname)==1)
 	{
-		printf("Cannot read folder!!\n");
+		printf("\'%s\' is not a file!\n",filename);
 		return;
 	}
+////////////////////////////
+	printf("inside readFile()fullname:%s\n",fullname);
+///////////////////////////////
 
-	int fd = -1;
-	int n;
-	char bufr[1024] = "";
-
-	strcpy(filepath, location);
-	getFilepath(filepath, filename);
-	fd = open(filepath, O_RDWR);
-	if (fd == -1)
+	/* read file */
+	char bufr[1024];
+	if(miniRead(fullname, bufr) != 0)
 	{
-		printf("Opening file error. Please check and try again!\n");
 		return;
 	}
+	/* display */
+	char pathname[MAX_FILENAME_LEN];
+	memset(pathname, 0, MAX_FILENAME_LEN);
+	strcpy(pathname, fullname);
+	strrpl(pathname,'_','/');
+	printf("--------------------------------------------------\n");
+	printf("Filepath: %s\n", pathname);
+	printf("Content: \n%s\n", bufr);
+	printf("--------------------------------------------------\n");
 
-	n = read(fd, bufr, 1024);
-	bufr[n] = 0;
-	printf("%s(fd=%d) : %s\n", filepath, fd, bufr);
-	close(fd);
 }
 
 /*****************************************************************************
@@ -1308,38 +1371,28 @@ void editAppand(const char * filepath, char * str)
 /*****************************************************************************
 *							   Delete File
 *****************************************************************************/
-void deleteFile(char * filepath)
+void deleteFile(char * filename)
 {
-	if (filecount == 0)
+	/* unlink file */
+	char fullname[MAX_FILENAME_LEN];
+	getFullname(fullname, filename);
+	if (unlink(fullname) != 0)
 	{
-		printf("Error, no file to delete!\n");
+		printf("Error encountered deleting file. Please check and try again!\n");
 		return;
 	}
 
-	if (unlink(filepath) != 0)
-	{
-		printf("Deleting file error. Please check and try again!\n");
-		return;
-	}
-
-	int i;
-	for (i = 0; i < filecount; i++)
-	{
-		if (strcmp(files[i], filepath) == 0)
-		{
-			memset(files[i], 0, MAX_FILENAME_LEN);
-			filequeue[i] = 0;
-			filecount--;
-			break;
-		}
-	}
+	/* update dir */
+	updateDir(filename,2);
+	
 
 	/* delete filename from user's dir */
+	/*
 	char dirpath[MAX_FILENAME_LEN];
 	char filename[MAX_FILENAME_LEN];
 	getDirpathAndFilename(dirpath, filename, filepath);
 
-	deleteFileFromDir(dirpath, filename);
+	deleteFileFromDir(dirpath, filename);*/
 }
 
 /*****************************************************************************
@@ -1347,12 +1400,6 @@ void deleteFile(char * filepath)
 *****************************************************************************/
 void deleteDir(char * filepath)
 {
-	if (dircount == 0)
-	{
-		printf("Error, no folder to delete!!\n");
-		return;
-	}
-
 	char dirfile[MAX_FILENAME_LEN];
 	char rdbuf[1024];
 	int fd = -1, n = 0;
@@ -1420,58 +1467,246 @@ void deleteDir(char * filepath)
 }
 
 /*****************************************************************************
-*						List All Files in the Directory
+*					ls
 *****************************************************************************/
 void ls()
 {
-	int fd = -1;
+	/* get dir fullname */
+	char dirpath[MAX_FILENAME_LEN];
+	memset(dirpath, 0, MAX_FILENAME_LEN);
+	strcpy(dirpath, location);
+	strrpl(dirpath,'/','_');
+///////////////////////////////
+	printf("inside ls()dirpath=%s\n",dirpath);
+/////////////////////////////////
+	/* open dir */
 	char bufr[1024];
+	miniRead(dirpath, bufr);
 
-	fd = open(location, O_RDWR);
-
-	if (fd == -1)
-	{
-		printf("Error opening file\n");
-		return;
-	}
-
-	read(fd, bufr, 1024);
 	printf("%s\n", bufr);
-	close(fd);
 }
 
 /*****************************************************************************
 *									cd
 *****************************************************************************/
-void cd(char * dirname)
+void cd(char * arg1)
 {
-	char filepath[MAX_FILENAME_LEN];
-	strcpy(filepath, location);
-	getDirFilepath(filepath, dirname);
-	if (!isDir(filepath))
+	char location2[MAX_FILENAME_LEN];	/* copy of location */
+	strcpy(location2, location);
+	char * lo = location2+strlen(location2); /* pointer of location2 */
+	char * ar = arg1; 			/* pointer of arg1 */
+////////////////////////////////////////
+	printf("location2:%s,lo:%s,ar:%s\n",location2,lo-1,ar);
+////////////////////////////////////////
+
+	/* root */
+	if(strcmp(arg1, "/")==0)
 	{
-		printf("NO folder %s!\n", dirname);
+		printf("what1");
+		strcpy(location, "root");
 		return;
 	}
 
-	strcat(location, "_");
-	strcat(location, dirname);
+	/* start from root */
+	if(*ar == '/')
+	{
+		printf("what2");
+		strcpy(location2, "root/");
+		lo=location2+strlen(location2);
+		ar++;
+	} 
+	else
+	{
+		*lo = '/';
+		lo++;
+	}
+	
+	/* get new path */
+	while(*ar){
+		if(*ar == '.' && *(ar+1) == '.')	/* go back */
+		{
+			//printf("2\n");////////////////
+			lo -= 2;
+			*(lo+2) = 0;
+			*(lo+1) = 0;
+			//printf("now lo:%s\n",lo);
+			while(*lo != '/'){
+				lo--;
+				*(lo+1)=0;
+				if(lo == location2)
+				{
+					printf("cd \'%s\':Invalid path!\n", arg1);
+					return;
+				}
+			}
+			*lo = 0;
+			ar += 2;		
+		}
+		else
+		{
+			//printf("3\n");////////////////////
+			*lo++ = *ar++;
+		}
+
+	}
+////////////////////////////////////////
+	//printf("before check location2:%s,lo:%s\n",location2,lo);
+////////////////////////////////////////
+	/* remove '/' at the end of location2 if there is one */
+	lo = location2+strlen(location2)-1;
+	if(*lo == '/')
+	{
+		lo--;
+		*(lo+1) = 0;
+	}
+////////////////////////////////////////
+	//printf("after location2:%s\n",location2);
+////////////////////////////////////////	
+
+	/* check if the dirctory exists */
+	char dirpath[MAX_FILENAME_LEN];
+	strcpy(dirpath, location2);
+	strrpl(dirpath,'/','_');
+	if (isDir(dirpath)==0)
+	{
+		printf("cd \'%s\':No such directory!\n", location2);
+		return;
+	}
+	
+	/* change the real location */
+	strcpy(location, location2);
+	
 }
 
 /*****************************************************************************
-*							Go Back To Previous Directory
+*					miniRead
+*return 0 if success
 *****************************************************************************/
-void cdback()
+int miniRead(char * fullname, char * buf)
 {
-	if (strcmp(location, "root") == 0)
+	int fd = -1;
+	int n;
+	memset(buf, 0, 1024);
+
+	/* open file */
+	fd = open(fullname, O_RDWR);
+	
+	if (fd == -1)
 	{
-		printf("ROOT");
-		return;
+		printf("File not found!\n");
+		return -1;
 	}
 
-	char dirpath[MAX_FILENAME_LEN];
-	char filename[MAX_FILENAME_LEN];
+	/* read file */
+	n = read(fd, buf, 1024);
+	buf[n] = 0;
 
-	getDirpathAndFilename(dirpath, filename, location);
-	strcpy(location, dirpath);
+	/* close file */
+	close(fd);
+	return 0;	
 }
+/*****************************************************************************
+*					miniWrite
+*return 0 if success
+*****************************************************************************/
+int miniWrite(char * fullname, char * buf)
+{
+	int fd = -1;
+
+	/* open file */
+	fd = open(fullname, O_RDWR);
+
+	if (fd == -1)
+	{
+		printf("File not found!\n");
+		return -1;
+	}
+
+	/* write file */
+	write(fd, buf, strlen(buf)+1);
+
+	/* close file */
+	close(fd);
+	return 0;
+}
+/*****************************************************************************
+*					truncate File
+*****************************************************************************/
+void truncateFile(char * filename)
+{
+	/* get full name */
+	char fullname[MAX_FILENAME_LEN];
+	memset(fullname, 0, MAX_FILENAME_LEN);
+	getFullname(fullname, filename);
+
+	/* truncate file */
+	char buf[1024];
+	memset(buf, 0, 1024);
+	miniWrite(fullname, buf);
+}
+/*****************************************************************************
+*					extend File
+*****************************************************************************/
+void extendFile(char * filename)
+{
+	/* get full name */
+	char fullname[MAX_FILENAME_LEN];
+	memset(fullname, 0, MAX_FILENAME_LEN);
+	getFullname(fullname, filename);
+
+	/* read file, extend content, write file */
+	char buf[1024];
+	miniRead(fullname, buf);
+	
+	/* get update content */
+	char content[256];
+	memset(content, 0, 256);
+	printf("Input content:\n");
+	int r2 = read(0, content, 256);
+	content[r2] = 0;
+///////////////////////////	
+	printf("rdbuf:%s\nlen:%d\nbuf:%s\nlen:%d\n",content,strlen(content),buf,strlen(buf));
+//////////////////////////////
+	strcat(buf, content);
+	printf("buf:%s\n",buf);
+	miniWrite(fullname, buf);
+
+	/* display result */
+	char bufr[1024];
+	miniRead(fullname, bufr);
+	printf("--------------------------------------------------\n");
+	printf("(Result) Content:\n%s\n", bufr);
+	printf("--------------------------------------------------\n");
+	
+}
+/*****************************************************************************
+*					rewrite File
+*****************************************************************************/
+void rewriteFile(char * filename)
+{
+	/* get full name */
+	char fullname[MAX_FILENAME_LEN];
+	memset(fullname, 0, MAX_FILENAME_LEN);
+	getFullname(fullname, filename);
+
+	/* get update content */
+	char content[256];
+	memset(content, 0, 256);
+	printf("Input content:\n");
+	int r2 = read(0, content, 256);
+	content[r2] = 0;
+///////////////////////
+	printf("rdbuf:%s\n",content);	
+/////////////////////
+
+	/* rewrite file */
+	miniWrite(fullname, content);
+
+	/* display result */
+	char bufr[1024];
+	miniRead(fullname, bufr);
+	printf("--------------------------------------------------\n");
+	printf("(Result) Content:\n%s\n", bufr);
+	printf("--------------------------------------------------\n");
+}
+
