@@ -521,7 +521,7 @@ void shabby_shell(const char * tty_name)
 				/* create a directory */
 				else if (strcmp(cmd, "mkdir") == 0)
 				{
-					if(checkFilename(arg1)==0)continue;
+					if(checkFilename(arg1)==0) continue;
 					createDir(arg1);
 				}
 
@@ -827,11 +827,9 @@ void help()
 	printf("=       edit     -rw    [filename]     Edit file, rewrite/cover the file      =\n");
 	printf("=       edit     -tr    [filename]     Truncate the file                      =\n");
     printf("=       calendar                       Print calendar                         =\n");
-    printf("=       clear                          Clean the screen                       =\n");
     printf("=       calculator                     Use calculator                         =\n");
     printf("=       game                           Play games                             =\n");
 	printf("===============================================================================\n");
-
 }
 
 

@@ -1,7 +1,6 @@
-
 #include<stdio.h>
  
-#define bool int//自定义bool类型
+#define bool int      //自定义bool类型
 #define true 1
 #define false 0
  
@@ -13,27 +12,27 @@ void main()
     printf("***************************************************\n");
 	printf("*                  Calendar                       *\n");
 	printf("***************************************************\n");
-	printf("*  1. Enter the year and month                    *\n");
-	printf("*  2. Example: 2018 08                            *\n");
-	printf("*  3. Enter e to quit                             *\n");
+	printf("*  Please enter the year and month                *\n");
+	printf("*  Example: 2018 08                               *\n");
+	printf("*  Enter e to quit                                *\n");
 	printf("***************************************************\n\n");
 
     while(1)
     {
-        char bufr1[128];
-        char bufr2[128];
+        char buffer1[128];
+        char buffer2[128];
         int y,m,week,i;
         printf("Please enter year: yyyy\n");
-        i = read(0, bufr1, 128);
-        if (bufr1[0] == 'e')
+        i = read(0, buffer1, 128);
+        if (buffer1[0] == 'e')
 			break;
-        y = getNum(bufr1);
+        y = getNum(buffer1);
 
         printf("Please enter month: mm\n");
-        i = read(0, bufr2, 128);
-        if (bufr2[0] == 'e')
+        i = read(0, buffer2, 128);
+        if (buffer2[0] == 'e')
 			break;
-        m = getNum(bufr2);
+        m = getNum(buffer2);
 
         printf("       %d %d   \n",y,m);
         printf("=====================\n");
@@ -57,8 +56,8 @@ void main()
         }
         printf("\n=====================\n");
 
-        memset(bufr1,0,100);
-        memset(bufr2,0,100);
+        memset(buffer1,0,100);
+        memset(buffer2,0,100);
     }
     
 }
@@ -98,16 +97,16 @@ int GetWeek(int year,int month)
     return week;
 }
 
-int getNum(char * bufr)
+int getNum(char * buffer)
 {
 	int ten = 1, i = 0, res = 0;
-	for (i = 0; i < strlen(bufr) - 1; i++)
+	for (i = 0; i < strlen(buffer) - 1; i++)
 	{
 		ten *= 10;
 	}
-	for (i = 0; i < strlen(bufr); i++)
+	for (i = 0; i < strlen(buffer); i++)
 	{
-		res += (bufr[i] - '0') * ten;
+		res += (buffer[i] - '0') * ten;
 		ten /= 10;
 	}
 	return res;
