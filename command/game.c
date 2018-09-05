@@ -3,15 +3,15 @@
 int main(int argc, char * argv[]){
 	while(1)
 	{
-	printf("              ***************************************************\n");
-	printf("              *                     Game                        *\n");
-	printf("              ***************************************************\n");
-	printf("              *   Please choose the game:                       *\n");
-	printf("              *   1. Guess number                               *\n");
-	printf("              *   2. Tic-Tac-Toe                                 *\n");
-	printf("              *   3. N queen game                               *\n");
-	printf("              *   Enter e to quit                               *\n");
-	printf("              ***************************************************\n\n");
+	printf("              ===================================================\n");
+	printf("              =                     Game                        =\n");
+	printf("              =-------------------------------------------------=\n");
+	printf("              =   Please choose the game:                       =\n");
+	printf("              =   1. Guess number                               =\n");
+	printf("              =   2. Tic-Tac-Toe                                =\n");
+	printf("              =   3. N queen game                               =\n");
+	printf("              =   Enter e to quit                               =\n");
+	printf("              ===================================================\n\n");
 	
 	char buffer[128];
 	read(0, buffer, 128);
@@ -28,7 +28,9 @@ int main(int argc, char * argv[]){
 	return 0;
 }
 
-/***************************guess number********************************/
+
+
+/***************************Guess number********************************/
 int my_atoi(const char *s)
 {
 	int num, i;
@@ -45,17 +47,16 @@ int my_atoi(const char *s)
 }
 void guess()
 {
-	printf("              ***************************************************\n");
-	printf("              *               Guess number                      *\n");
-	printf("              ***************************************************\n");
-	printf("              *                                                 *\n");
-	printf("              *              Enter e to quit                    *\n");
-	printf("              *                                                 *\n");
-	printf("              ***************************************************\n\n");
+	printf("              ===================================================\n");
+	printf("              =               Guess number                      =\n");
+	printf("              =-------------------------------------------------=\n");
+	printf("              =    number:1~999                                 =\n");
+	printf("              =    Enter e to quit                              =\n");
+	printf("              ===================================================\n\n");
 	int stop = 0;
 	int a,b;
 	char c;
-	a = 543;
+	a = 489;
 	printf("There is a number between 1 and 999.\nPlease enter your first guess.\n");
 	char buffer[128];
 	read(0, buffer, 128);
@@ -99,7 +100,6 @@ void guess()
 
 
 /****************************N queen game*******************************/
-
 void huisu(int l);
 
 int jc(int l, int i);
@@ -108,13 +108,13 @@ int x;
 
 void queen()
 {
-		printf("              ***************************************************\n");
-		printf("              *               N Queen game                      *\n");
-		printf("              ***************************************************\n");
-		printf("              *                                                 *\n");
-		printf("              *              Enter e to quit                    *\n");
-		printf("              *                                                 *\n");
-		printf("              ***************************************************\n\n");
+		printf("              ===================================================\n");
+		printf("              =                   N Queen game                  =\n");
+		printf("              =-------------------------------------------------=\n");
+		printf("              =                                                 =\n");
+		printf("              =                 Enter e to quit                 =\n");
+		printf("              =                                                 =\n");
+		printf("              ===================================================\n\n");
 
 		printf("N=");
 		char bur[128];
@@ -157,7 +157,6 @@ int jc(int l, int i)
 
 
 /***************************Tic-Tac-Toe*********************************/
-
 typedef char chess[10];
 typedef int temparr[10];
 chess arr;
@@ -174,9 +173,9 @@ void display(chess a)
 {
 	printf("              \n"); printf("\n");
 	printf("               %c | %c | %c\n", a[1], a[2], a[3]);
-	printf("               --------------\n");
+	printf("               ---------\n");
 	printf("               %c | %c | %c\n", a[4], a[5], a[6]);
-	printf("               --------------\n");
+	printf("               ---------\n");
 	printf("               %c | %c | %c\n", a[7], a[8], a[9]);
 	printf("              \n"); printf("\n");
 }
@@ -314,13 +313,14 @@ void computerstep()       //计算机走棋处理模块
 void Tic()
 {
 
-	printf("              ***************************************************\n");
-	printf("              *               Tic-Tac-Toe                        *\n");
-	printf("              ***************************************************\n");
-	printf("              *                                                 *\n");
-	printf("              *              Enter e to quit                    *\n");
-	printf("              *                                                 *\n");
-	printf("              ***************************************************\n\n");
+	printf("              ===================================================\n");
+	printf("              =                   Tic-Tac-Toe                   =\n");
+	printf("              =-------------------------------------------------=\n");
+	printf("              =                                                 =\n");
+	printf("              =                 Enter e to quit                 =\n");
+	printf("              =                                                 =\n");
+	printf("              ===================================================\n\n");
+
 	inarrdata(arr);       //棋盘坐标编号
 	display(arr);         //显示初始棋盘
 	suc = 1;

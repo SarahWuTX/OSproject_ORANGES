@@ -7,15 +7,16 @@ int main(int argc, char * argv[])
 	char buffer1[128];
     char buffer2[128];
 
-	printf("***************************************************\n");
-	printf("*                  Calculator                     *\n");
-	printf("***************************************************\n");
-	printf("*  Please enter two integers                      *\n");
-	printf("*  Example: 10+2                                  *\n");
-	printf("*  Enter e to quit                                *\n");
-	printf("***************************************************\n\n");
+	printf("                ===================================================\n");
+	printf("                =                  Calculator                     =\n");
+	printf("                =-------------------------------------------------=\n");
+	printf("                =  Please enter two positive integers             =\n");
+	printf("                =  Example: 10+2                                  =\n");
+	printf("                =  Enter e to quit                                =\n");
+	printf("                ===================================================\n");
 
 	while(flag == 1){	
+		printf("\n");
 		printf("Please input num1:");
 		i = read(0, buffer1, 128);
 		if (buffer1[0] == 'e')
@@ -47,13 +48,14 @@ int main(int argc, char * argv[])
                 printf("%d * %d = %d\n", num1, num2, res);
 				break;
 			case '/':
-				if(num2 <= 0)
+				if(num2 == 0)
 				{
 					printf("Num2 = Zero!\n");
 					break;
 				}
 				res = num1 / num2;
 				printf("%d / %d = %d\n", num1, num2, res);
+				break;
 			case 'e':
 				flag = 0;
 				break;
@@ -64,7 +66,6 @@ int main(int argc, char * argv[])
         memset(buffer,0,100);
         memset(buffer,0,100);
 	}
-    
 	return 0;
 }
 

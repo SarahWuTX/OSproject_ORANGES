@@ -9,13 +9,13 @@ int GetWeek(int year,int month);
 void main()
 {
 
-    printf("***************************************************\n");
-	printf("*                  Calendar                       *\n");
-	printf("***************************************************\n");
-	printf("*  Please enter the year and month                *\n");
-	printf("*  Example: 2018 08                               *\n");
-	printf("*  Enter e to quit                                *\n");
-	printf("***************************************************\n\n");
+    printf("              ===================================================\n");
+	printf("              =                  Calendar                       =\n");
+	printf("              =-------------------------------------------------=\n");
+	printf("              =  Please enter the year and month                =\n");
+	printf("              =  Example: 2018 08                               =\n");
+	printf("              =  Enter e to quit                                =\n");
+	printf("              ===================================================\n\n");
 
     while(1)
     {
@@ -39,19 +39,19 @@ void main()
         printf("  M  T  W  T  F  S  S\n");
         week = GetWeek(y,m);
         if(week == 0)
-            week = 7;									//若week == 0，将其视作7，以便留下足够的空格
+            week = 7;
     
         for (i = 1;i < week; i++)
         {
-            printf("   ");								//三个字符为一个单位，保证第一行与周数对应
+            printf("   ");								//保持对齐
         }
-        int month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};//以数组方式统计每个月的天数
+        int month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
         if (IsLeap(y) == true)							//若为闰年，将2月份的天数修改为29
             month[1] = 29;
-        for(i=1;i<=month[m-1];i++)						//利用for循环，依次输出日数，并且若加上通过计算week+i-1%7来判断是否该换行
+        for(i=1;i<=month[m-1];i++)						//输出日数
         {
             printf("%3d",i);
-            if((i+week-1) % 7 == 0)						
+            if((i+week-1) % 7 == 0)						//判断换行
                 printf("\n");
         }
         printf("\n=====================\n");
@@ -64,7 +64,7 @@ void main()
  
 bool IsLeap(int year)
 {
-    if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))//判断是否为闰年的条件
+    if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))   //判断是否为闰年
         return true;
     else
         return false;
@@ -72,7 +72,7 @@ bool IsLeap(int year)
  
 int GetWeek(int year,int month)
 {
-    int m[12] = {31,28,31,30,31,30,31,31,30,31,30,31};			//以数组记录每个月的天数
+    int m[12] = {31,28,31,30,31,30,31,31,30,31,30,31};			  //记录每个月的天数
     int day=0,week,i;
     switch (month)
     {
