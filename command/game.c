@@ -3,103 +3,36 @@
 int main(int argc, char * argv[]){
 	while(1)
 	{
-	printf("              ===================================================\n");
-	printf("              =                     Game                        =\n");
-	printf("              =-------------------------------------------------=\n");
-	printf("              =   Please choose the game:                       =\n");
-	printf("              =   1. Guess number                               =\n");
-	printf("              =   2. Tic-Tac-Toe                                =\n");
-	printf("              =   3. N queen game                               =\n");
-	printf("              =   Enter e to quit                               =\n");
-	printf("              ===================================================\n\n");
+	printf("              ***************************************************\n");
+	printf("              *                     Game                        *\n");
+	printf("              ***************************************************\n");
+	printf("              *             Please choice the game              *\n");
+	printf("              *                   1.Gobang                      *\n");
+	printf("              *                   2.ic-tac-toe                  *\n");
+	printf("              *                   3.Guess number                *\n");
+	printf("              *                   4.N queen game                *\n");
+	printf("              *                 Enter e to quit                 *\n");
+	printf("              ***************************************************\n\n");
 	
-	char buffer[128];
-	read(0, buffer, 128);
-	if('1' == buffer[0])
+	char bur[128];
+	read(0, bur, 128);
+	if('1' == bur[0])
+		Gobang();
+	if('2' == bur[0])
+		ic();
+	if('3' == bur[0])
 		guess();
-	if('2' == buffer[0])
-		Tic();
-	if('3' == buffer[0])
+	if('4' == bur[0])
 		queen();
-	if('e' == buffer[0])
+	if('e' == bur[0])
 		break;
 	printf("\n\n\n\n\n");
 	}
 	return 0;
 }
 
-
-
-/***************************Guess number********************************/
-int my_atoi(const char *s)
-{
-	int num, i;
-	char ch;
-	num = 0;
-	for (i = 0; i < 3; i++)
-	{
-		ch = s[i];
-		if (ch < '0' || ch > '9')
-			break;
-		num = num*10 + (ch - '0');
-	}
-	return num;
-}
-void guess()
-{
-	printf("              ===================================================\n");
-	printf("              =               Guess number                      =\n");
-	printf("              =-------------------------------------------------=\n");
-	printf("              =    number:1~999                                 =\n");
-	printf("              =    Enter e to quit                              =\n");
-	printf("              ===================================================\n\n");
-	int stop = 0;
-	int a,b;
-	char c;
-	a = 489;
-	printf("There is a number between 1 and 999.\nPlease enter your first guess.\n");
-	char buffer[128];
-	read(0, buffer, 128);
-	b=my_atoi(buffer);
-	while (b!= -1)
-	{
-		if (b == a)
-		{
-			printf("Excellent! You guessed the number!\n Would you like to play again(y or n)?");
-			char buffer[128];
-			read(0, buffer, 128);
-			switch (buffer[0]) {
-			case 'y':
-				printf("There is a number between 1 and 999.\nPlease enter your first guess.\n");
-				read(0, buffer, 128);
-				break;
-			case 'n':
-				stop = 1;
-				break;
-			}
-			if (stop == 1)
-				break;
-		}
-		while (b<a)
-		{
-			printf("Too low.Try again.\n");
-			read(0, buffer, 128);
-			b=my_atoi(buffer);
-		}
-		while (b>a)
-		{
-			printf("Too high.Try again.\n");
-			read(0, buffer, 128);
-			b=my_atoi(buffer);
-		}
-		if(buffer[0]=='e')
-			break;
-	}
-}
-
-
-
 /****************************N queen game*******************************/
+
 void huisu(int l);
 
 int jc(int l, int i);
@@ -108,13 +41,13 @@ int x;
 
 void queen()
 {
-		printf("              ===================================================\n");
-		printf("              =                   N Queen game                  =\n");
-		printf("              =-------------------------------------------------=\n");
-		printf("              =                                                 =\n");
-		printf("              =                 Enter e to quit                 =\n");
-		printf("              =                                                 =\n");
-		printf("              ===================================================\n\n");
+		printf("              ***************************************************\n");
+		printf("              *               N Queen game                      *\n");
+		printf("              ***************************************************\n");
+		printf("              *                                                 *\n");
+		printf("              *              Enter e to quit                    *\n");
+		printf("              *                                                 *\n");
+		printf("              ***************************************************\n\n");
 
 		printf("N=");
 		char bur[128];
@@ -153,10 +86,78 @@ int jc(int l, int i)
 			return 1;
 	return 0;
 }
+/***************************guess number********************************/
+int my_atoi(const char *s)
+{
+	int num, i;
+	char ch;
+	num = 0;
+	for (i = 0; i < 3; i++)
+	{
+		ch = s[i];
+		if (ch < '0' || ch > '9')
+			break;
+		num = num*10 + (ch - '0');
+	}
+	return num;
+}
+void guess()
+{
+	printf("              ***************************************************\n");
+	printf("              *               Guess number                      *\n");
+	printf("              ***************************************************\n");
+	printf("              *                                                 *\n");
+	printf("              *              Enter e to quit                    *\n");
+	printf("              *                                                 *\n");
+	printf("              ***************************************************\n\n");
+	int stop = 0;
+	int a,b;
+	char c;
+	a = 543;
+	printf("I have a number between 1 and 999.\nCan you guess my number?\nPlease type your first guess.\n");
+	char bufr[128];
+	read(0, bufr, 128);
+	b=my_atoi(bufr);
+	while (b!= -1)
+	{
+		if (b == a)
+		{
+			printf("Excellent! You guessed the number!\nWould you like to play again(y or n)?");
+			char bur[128];
+			read(0, bur, 128);
+			switch (bur[0]) {
+			case 'y':
+				printf("I have a number between 1 and 1000.\nCan you guess my number?\nPlease type your first guess.\n");
+				read(0, bufr, 128);
+				break;
+			case 'n':
+				stop = 1;
+				break;
+			}
+			if (stop == 1)
+				break;
+		}
+		while (b<a)
+		{
+			printf("Too low.Try again.\n");
+			read(0, bufr, 128);
+			b=my_atoi(bufr);
+		}
+		while (b>a)
+		{
+			printf("Too high.Try again.\n");
+			read(0, bufr, 128);
+			b=my_atoi(bufr);
+		}
+		if(bufr[0]=='e')
+			break;
+	}
+}
 
 
 
-/***************************Tic-Tac-Toe*********************************/
+/***************************tic-tac-toe*********************************/
+
 typedef char chess[10];
 typedef int temparr[10];
 chess arr;
@@ -173,9 +174,9 @@ void display(chess a)
 {
 	printf("              \n"); printf("\n");
 	printf("               %c | %c | %c\n", a[1], a[2], a[3]);
-	printf("               ---------\n");
+	printf("               --------------\n");
 	printf("               %c | %c | %c\n", a[4], a[5], a[6]);
-	printf("               ---------\n");
+	printf("               --------------\n");
 	printf("               %c | %c | %c\n", a[7], a[8], a[9]);
 	printf("              \n"); printf("\n");
 }
@@ -231,11 +232,11 @@ int maxbrr(int *br)
 	}
 	return mb;
 }
-void manstep()       //人走棋处理模块
+void manstep() //人走棋处理模块
 {
 	int j;
 	display(arr);
-	if (arrfull())   //如果棋盘上还有下棋的位置，给人走一步棋
+	if (arrfull()) //如果棋盘上还有下棋的位置，给人走一步棋
 	{
 		printf("Which step are you going to take? please enter a number(1--9):");
 		char bur[128];
@@ -252,7 +253,7 @@ void manstep()       //人走棋处理模块
 		number = linenum(arr[3], arr[6], arr[9]); cn(number);
 		number = linenum(arr[1], arr[5], arr[9]); cn(number);
 		number = linenum(arr[3], arr[5], arr[7]); cn(number);
-		if (n3 == 0)     //你赢了
+		if (n3 == 0) //你赢了
 		{
 			display(arr);
 			printf("\n");
@@ -262,10 +263,10 @@ void manstep()       //人走棋处理模块
 		}
 	}
 }
-void computerstep()       //计算机走棋处理模块
+void computerstep() //计算机走棋处理模块
 {
 	int i;
-	if (arrfull())        //如果棋盘上还有可下棋的位置，则计算机走棋
+	if (arrfull()) //如果棋盘上还有可下棋的位置，则计算机走棋
 	{
 		for (i = 1; i <= 9; i++) //对每一步可走的棋进行计算
 		{
@@ -287,7 +288,7 @@ void computerstep()       //计算机走棋处理模块
 			else
 				brr[i] = -999;
 		}
-		arr[maxbrr(brr)] = 'X';      //确定计算机走哪一步，权值最大的一步
+		arr[maxbrr(brr)] = 'X'; //确定计算机走哪一步，权值最大的一步
 		c3 = 0; n2 = 0; c2 = 0; n1 = 0; c1 = 0;
 		number = linenum(arr[1], arr[2], arr[3]); cn(number);
 		number = linenum(arr[4], arr[5], arr[6]); cn(number);
@@ -297,7 +298,7 @@ void computerstep()       //计算机走棋处理模块
 		number = linenum(arr[3], arr[6], arr[9]); cn(number);
 		number = linenum(arr[1], arr[5], arr[9]); cn(number);
 		number = linenum(arr[3], arr[5], arr[7]); cn(number);
-		if (c3 != 0)        //计算机已赢
+		if (c3 != 0) //计算机已赢
 		{
 			display(arr);
 			printf("\n");
@@ -310,19 +311,18 @@ void computerstep()       //计算机走棋处理模块
 		suc = 0;
 
 }
-void Tic()
+void ic()
 {
 
-	printf("              ===================================================\n");
-	printf("              =                   Tic-Tac-Toe                   =\n");
-	printf("              =-------------------------------------------------=\n");
-	printf("              =                                                 =\n");
-	printf("              =                 Enter e to quit                 =\n");
-	printf("              =                                                 =\n");
-	printf("              ===================================================\n\n");
-
-	inarrdata(arr);       //棋盘坐标编号
-	display(arr);         //显示初始棋盘
+	printf("              ***************************************************\n");
+	printf("              *               ic-tac-toe                        *\n");
+	printf("              ***************************************************\n");
+	printf("              *                                                 *\n");
+	printf("              *              Enter e to quit                    *\n");
+	printf("              *                                                 *\n");
+	printf("              ***************************************************\n\n");
+	inarrdata(arr); //棋盘坐标编号
+	display(arr); //显示初始棋盘
 	suc = 1;
 	printf("Do you want to go first?(y/n)");
 	char bufr[128];
@@ -347,4 +347,146 @@ void Tic()
 	}
 	if(!arrfull())
 		printf("\nNo winer !\n");
+}
+
+
+/*******************GObang Game********************/
+
+#define N	15
+int chessboard[N + 1][N + 1] = { 0 };
+
+//用来记录轮到玩家1还是玩家2
+int whoseTurn = 0;
+
+void initGame(void);
+void printChessboard(void);
+void playChess(void);
+int judge(int, int);
+int stop=0;
+int Gobang()
+{
+	//初始化游戏
+	initGame();
+	whoseTurn = 0;
+	stop=0;
+	chessboard[N + 1][N + 1] =0;
+	printf("Player1:");
+	while (1)
+	{
+			//每次循环自增1，实现玩家轮流下子
+		whoseTurn++;
+
+		playChess();
+		if(stop==1)
+			break;
+	}
+	stop=0;
+
+	return 0;
+}
+
+void initGame(void)
+{
+	printf("              ***************************************************\n");
+	printf("              *               Gobang Game                       *\n");
+	printf("              ***************************************************\n");
+	printf("              *                                                 *\n");
+	printf("              *              Enter e to quit                    *\n");
+	printf("              *                                                 *\n");
+	printf("              ***************************************************\n\n");
+	printChessboard();
+}
+
+void printChessboard(void)
+{
+	int i, j;
+
+	for (i = 0; i <= N; i++)
+	{
+		for (j = 0; j <= N; j++)
+		{
+			if (0 == i)
+				printf("%3d", j);
+			else if (j == 0)
+				printf("%3d", i);
+			else if (1 == chessboard[i][j])
+				printf("  !");
+			else if (2 == chessboard[i][j])
+				printf("  &");
+			else
+				printf("  *");
+		}
+		printf("\n");
+	}
+}
+
+void playChess(void)
+{
+	int i, j;
+	char bufr[128];
+	read(0, bufr, 128);
+
+	if (1 == whoseTurn % 2)
+	{
+		
+		i = chartonumber(bufr[0]);
+		j = chartonumber(bufr[2]);
+		chessboard[i][j] = 1;
+	}
+	if (0 == whoseTurn % 2)
+	{
+		
+		i = chartonumber(bufr[0]);
+		j = chartonumber(bufr[2]);
+		chessboard[i][j] = 2;
+	}
+
+	if(bufr[0]=='e')
+		stop=1;
+	else{
+		printChessboard();
+		if (1 == whoseTurn % 2)
+			printf("Player2:");
+		else
+			printf("Player1:");
+	}
+	if (judge(i, j))
+	{
+		if (1 == whoseTurn % 2)
+			printf("Player1 win!\n");
+		else{
+			printf("Player2 win!\n");
+		}
+		stop=1;
+	}
+    
+}
+
+int judge(int x, int y)
+{
+	int i, j;
+	int t = 2 - whoseTurn % 2;
+
+	for (i = x - 4, j = y; i <= x; i++)
+	{
+		if (i >= 1 && i <= N - 4 && t == chessboard[i][j] && t == chessboard[i + 1][j] && t == chessboard[i + 2][j] && t == chessboard[i + 3][j] && t == chessboard[i + 4][j])
+			return 1;
+	}
+	for (i = x, j = y - 4; j <= y; j++)
+	{
+		if (j >= 1 && j <= N - 4 && t == chessboard[i][j] && t == chessboard[i][j + 1] && t == chessboard[i][j + 1] && t == chessboard[i][j + 3] && t == chessboard[i][j + 4])
+			return 1;
+	}
+	for (i = x - 4, j = y - 4; i <= x, j <= y; i++, j++)
+	{
+		if (i >= 1 && i <= N - 4 && j >= 1 && j <= N - 4 && t == chessboard[i][j] && t == chessboard[i + 1][j + 1] && t == chessboard[i + 2][j + 2] && t == chessboard[i + 3][j + 3] && t == chessboard[i + 4][j + 4])
+			return 1;
+	}
+	for (i = x + 4, j = y - 4; i >= 1, j <= y; i--, j++)
+	{
+		if (i >= 1 && i <= N - 4 && j >= 1 && j <= N - 4 && t == chessboard[i][j] && t == chessboard[i - 1][j + 1] && t == chessboard[i - 2][j + 2] && t == chessboard[i - 3][j + 3] && t == chessboard[i - 4][j + 4])
+			return 1;
+	}
+
+	return 0;
 }
