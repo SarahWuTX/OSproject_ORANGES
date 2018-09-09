@@ -17,6 +17,12 @@ bochs-2.6.9
 
 
 
+## 项目管理平台GitHub
+
+https://github.com/SarahWuTX/OSproject_ORANGES
+
+
+
 ## 操作系统组成
 
 boot 引导
@@ -76,6 +82,7 @@ mm 内存调度系统
 | mkfile | filename content | 创建新文件 |
 | read | filename | 读取文件 |
 | rm | filename | 删除文件 |
+| rmdir | name | 删除文件夹 |
 | edit -ad| filename | 编辑文件，追加文件内容 |
 | edit -rw| filename | 编辑文件，覆盖文件内容 |
 | edit -tr| filename | 截短文件，清空文件内容 |
@@ -137,7 +144,7 @@ mm 内存调度系统
 
   ![](pics/edit-rw.png)
 
-  ​           3.在控制台输入edit -tr [filename]指令，可以截短文件，清空文件内容
+             3.在控制台输入edit -tr [filename]指令，可以截短文件，清空文件内容
 
   ![](pics/edit-tr.png)
 

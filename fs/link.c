@@ -52,8 +52,8 @@ PUBLIC int do_unlink()
 
 	int inode_nr = search_file(pathname);
 	if (inode_nr == INVALID_INODE) {	/* file not found */
-		printl("{FS} FS::do_unlink():: search_file() returns "
-			"invalid inode: %s\n", pathname);
+		//printl("{FS} FS::do_unlink():: search_file() returns "
+			//"invalid inode\n");
 		return -1;
 	}
 

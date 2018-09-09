@@ -164,10 +164,11 @@ PUBLIC char * strcat(char * s1, const char *s2)
 *
 * @return  Ptr to the 1st string.
 *****************************************************************************/
+/*
 PUBLIC char * strjin(char * s1, const char *s2, const char ch)
 {
 	if ((s1 == 0) || (s2 == 0)) { /* for robustness */
-		return 0;
+/*		return 0;
 	}
 
 	char * p1 = s1;
@@ -184,7 +185,7 @@ PUBLIC char * strjin(char * s1, const char *s2, const char ch)
 
 	return s1;
 }
-
+*/
 /*****************************************************************************
 *                                strrpl
 *****************************************************************************/

@@ -1,9 +1,10 @@
 
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-main.c
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*****************************************************************************
+ *****************************************************************************
+ * @file   kernel/main.c
+ * @brief  
+ *****************************************************************************
+ *****************************************************************************/
 
 #include "type.h"
 #include "stdio.h"
@@ -17,12 +18,7 @@ main.c
 #include "global.h"
 #include "proto.h"
 
-#define	MAX_USER		2
-#define	MAX_USER_FILE	100
-#define MAX_USER_DIR	16
-#define	MAX_PSWD_LEN	12
-
-#define	MAX_FILES		80
+//#define	MAX_USER		2
 #define	MAX_DIRS		32
 
 
@@ -31,8 +27,8 @@ int dirmap[MAX_DIRS];
 char dir[MAX_DIRS][MAX_FILENAME_LEN];
 
 void shabby_shell(const char * tty_name);
-
 void initFS();
+
 void welcome();
 void clear();
 void help();
@@ -42,8 +38,8 @@ void cd(char * arg1);
 
 void createFile(char *filename, char * buf);
 void createDir(char *filename);
-void deleteFile(char * filepath);
-void deleteDir(char * filepath);
+void deleteFile(char * filename);
+void deleteDir(char * filename);
 
 int miniRead(char * fullname, char * buf);
 int miniWrite(char * fullname, char * buf);
@@ -56,7 +52,7 @@ void rewriteFile(char * filename);
 int checkFilename(const char * arg1);
 int updateDir(char * filename, int op);
 void getFullname(char * fullname, char * filename);
-int isDir(const char * filepath);
+int isDir(const char * dirpath);
 
 
 /*****************************************************************************
@@ -378,7 +374,7 @@ void shabby_shell(const char * tty_name)
 	char cmd[64];
 	char arg1[MAX_FILENAME_LEN];
 	char arg2[MAX_FILENAME_LEN];
-	char filepath[MAX_FILENAME_LEN];
+	//char filepath[MAX_FILENAME_LEN];
 
 	clear();
 	welcome();
@@ -542,6 +538,18 @@ void shabby_shell(const char * tty_name)
 					cd(arg1);
 				}
 
+				/* echo */
+				else if (strcmp(cmd, "echo") == 0)
+				{
+					printf("%s\n",arg1);
+				}
+
+				/* pwd */
+				else if (strcmp(cmd, "pwd") == 0)
+				{
+					printf("%s\n",location);
+				}
+
 				else
 				{
 					printf("Command not found\n");
@@ -598,6 +606,10 @@ int checkFilename(const char * arg1)
 /*****************************************************************************
 /*					        getFullname
 *****************************************************************************/
+/**
+*param@ [out] fullname
+*param@ [in]  filename
+*****************************************************************************/
 void getFullname(char * fullname, char * filename)
 {
 	memset(fullname, 0, MAX_FILENAME_LEN);
@@ -610,7 +622,7 @@ void getFullname(char * fullname, char * filename)
 	//printf("fullname:%s\n",fullname);
 }
 /*****************************************************************************
-*								Welcome
+*						welcome
 *****************************************************************************/
 void welcome()
 {
@@ -627,11 +639,11 @@ void welcome()
 	printf(" =============================================================================\n");
 	printf(" =                          HELP - List all commands                         =\n");
 	printf(" =============================================================================\n");
-	printf("\n\n\n\n");
+	printf("\n\n\n\n\n\n\n\n\n\n\n");
 }
 
 /*****************************************************************************
-*								Clear
+*						clear
 *****************************************************************************/
 void clear()
 {
@@ -641,36 +653,38 @@ void clear()
 }
 
 /*****************************************************************************
-*							Show Help Message
+*						help
 *****************************************************************************/
 void help()
 {
 	printf("===============================================================================\n");
-	printf("=       Command                        Description                            =\n");
+	printf("=     Command                          Description                            =\n");
 	printf("=-----------------------------------------------------------------------------=\n");
-	printf("=       welcome                        Print welcome page                     =\n");
-	printf("=       clear                          Clean the screen                       =\n");
-	printf("=       cd       [path]                Get into the path                      =\n");
-	printf("=       ls                             List all the files in current directory=\n");
-	printf("=       help                           List all commands                      =\n");
-	printf("=       mkdir    [name]                Create a directory                     =\n");
-	printf("=       mkfile   [file] [content]      Create a textfile                      =\n");
-	printf("=       read     [file]                Read a file                            =\n");
-	printf("=       rm       [file]                Remove a file                          =\n");
-	//printf("=       rmdir    [file]                Remove a directory                     =\n");
-	printf("=       edit     -ad    [filename]     Edit file, add content behind          =\n");
-	printf("=       edit     -rw    [filename]     Edit file, rewrite/cover the file      =\n");
-	printf("=       edit     -tr    [filename]     Truncate the file                      =\n");
+	printf("=     welcome                          Print welcome page                     =\n");
+	printf("=     clear                            Clean the screen                       =\n");
+	printf("=     echo                             Echo the input message                 =\n");
+	printf("=     pwd                              Show the current path                  =\n");
+	printf("=     cd      [path]                   Get into the path                      =\n");
+	printf("=     ls                               List all the files in current directory=\n");
+	printf("=     help                             List all commands                      =\n");
+	printf("=     mkdir   [dirname]                Create a directory                     =\n");
+	printf("=     mkfile  [filename] [content]     Create a textfile                      =\n");
+	printf("=     read    [filename]               Read a file                            =\n");
+	printf("=     rm      [filename]               Remove a file                          =\n");
+	printf("=     rmdir   [dirname]                Remove a directory                     =\n");
+	printf("=     edit    -ad        [filename]    Edit file, add content behind          =\n");
+	printf("=     edit    -rw        [filename]    Edit file, rewrite/cover the content   =\n");
+	printf("=     edit    -tr        [filename]    Truncate the file                      =\n");
 	printf("===============================================================================\n");
 
 }
 
 /*****************************************************************************
-*							File System
+*						File System
 *****************************************************************************/
 
 /*****************************************************************************
-*							Init FS
+*						initFS
 *****************************************************************************/
 void initFS()
 {
@@ -702,6 +716,9 @@ void initFS()
 
 /*****************************************************************************
 *							 isDir
+*****************************************************************************/
+/**
+*param@ dirpath	  The full path of directory
 *return 1 if it is a directory, otherwise 0
 *****************************************************************************/
 int isDir(const char * dirpath)
@@ -714,7 +731,7 @@ int isDir(const char * dirpath)
 }
 
 /*****************************************************************************
-*							 Create File
+*							 createFile
 *****************************************************************************/
 void createFile(char * filename, char * buf)
 {
@@ -728,12 +745,6 @@ void createFile(char * filename, char * buf)
 	///////////////////////////////
 	if (fd == -1)
 	{
-		printf("Oops! Internal error!\n");
-		return;
-	}
-	else if (fd == -2)
-	{
-		//printf("File \'%s\' exists!\n",filename);
 		return;
 	}
 
@@ -749,7 +760,7 @@ void createFile(char * filename, char * buf)
 }
 
 /*****************************************************************************
-*							 Update Directory
+*							 updateDir
 *****************************************************************************?
 /*
 *@param	filename	
@@ -779,7 +790,7 @@ int updateDir(char * filename, int op)
 
 	/* update dir */
 	int namelen = strlen(filename);
-	char temp[MAX_FILENAME_LEN];	/* store the dir name temporally */
+	char temp[MAX_FILENAME_LEN];	/* store the filename temporally */
 	char * t = temp;	/* pointer of temp */
 	char * it = bufr;	/* pointer of bufr */
 	switch (op) {
@@ -833,7 +844,7 @@ int updateDir(char * filename, int op)
 	return 0;
 }
 /*****************************************************************************
-*							 Create Directory
+*							 createDir
 *****************************************************************************/
 void createDir(char * filename)
 {
@@ -877,7 +888,6 @@ void createDir(char * filename)
 //////////////////////////////
 	if (fd == -1)
 	{
-		printf("Oops! Internal error!\n");
 		/* roll back */
 		for(int k=0;k<MAX_DIRS;k++){
 			if(strcmp(dir[k], fullname)==0)
@@ -889,26 +899,7 @@ void createDir(char * filename)
 		}
 		return;
 	}
-	else if (fd == -2)
-	{
-		//printf("File \'%s\' exists!!\n", filename);
-		/* roll back */
-		for(int k=0;k<MAX_DIRS;k++){
-/////////////////////////////////////
-			//printf("dir[k]:%s,fn:%s\n",dir[k], fullname);
-//////////////////////////////////////
-			if(strcmp(dir[k], fullname)==0)
-			{
-				memset(dir[k], 0, MAX_FILENAME_LEN);
-				dirmap[k]=0;
-				break;
-			}
-//////////////////////////////////////
-			//printf("yes i ve been here\n");
-//////////////////////////////////////
-		}
-		return;
-	}
+	
 	/* initialize dir */
 	char dirbuf[256];
 	memset(dirbuf, 0, 256);
@@ -922,7 +913,7 @@ void createDir(char * filename)
 }
 
 /*****************************************************************************
-*								Read File
+*							readFile
 *****************************************************************************/
 void readFile(char * filename)
 {
@@ -960,16 +951,23 @@ void readFile(char * filename)
 
 
 /*****************************************************************************
-*							   Delete File
+*							deleteFile
 *****************************************************************************/
 void deleteFile(char * filename)
 {
-	/* unlink file */
+	/* check if it is a dir */
 	char fullname[MAX_FILENAME_LEN];
 	getFullname(fullname, filename);
+	if (isDir(fullname)==1)
+	{
+		printf("\'%s\' is not a file!\n",filename);
+		return;
+	}
+
+	/* unlink file */
 	if (unlink(fullname) != 0)
 	{
-		printf("Error encountered deleting file. Please check and try again!\n");
+		printf("Error encountered deleting file. Please try again!\n");
 		return;
 	}
 
@@ -979,15 +977,82 @@ void deleteFile(char * filename)
 }
 
 /*****************************************************************************
-*							 Delete Directory
+*							deleteDir
 *****************************************************************************/
-void deleteDir(char * dirpath)
+void deleteDir(char * filename)
 {
+	/* get fullname of dir */
+	char fullname[MAX_FILENAME_LEN];
+	getFullname(fullname, filename);
+
+	/* check if it is a dir */
+	if (isDir(fullname)==0)
+	{
+		printf("\'%s\' is not a directory!\n",filename);
+		return;
+	}
 	
+	/* delete children */
+	cd(filename);
+	char buf[256];
+	miniRead(fullname, buf);
+	char temp[MAX_FILENAME_LEN];	/* store the filename temporally */
+	char * t = temp;	/* pointer of temp */
+	char * it = buf;	/* pointer of buf */
+
+	while(*it){
+		if(*it == ' ')
+		{
+			*t = 0;
+			getFullname(fullname, temp);
+///////////////////////////////////////////////////
+			printf("fullname[%s]\n",fullname);
+///////////////////////////////////////////////////
+			unlink(fullname);
+			printf("deleting[%s/%s]\n",location,temp);
+			if(isDir(fullname)==1)
+			{
+				/* it is a dirctory */
+				int i=0;
+				for(;i<MAX_DIRS;i++){
+					if(strcmp(dir[i],fullname)==0)
+						break;
+				}
+				dirmap[i]=0;
+				memset(dir[i], 0, MAX_FILENAME_LEN);
+			}
+		
+			/* reset */
+			it++;
+			t = temp;
+			memset(temp, 0, MAX_FILENAME_LEN);
+		}
+		else 
+		{
+			*t++ = *it++;
+		}
+	}
+
+	/* delete itself */
+	cd("..");
+	getFullname(fullname, filename);
+	unlink(fullname);
+
+	/* update dir */
+	updateDir(filename,2);
+
+	/* update global data */
+	int i=0;
+	for(;i<MAX_DIRS;i++){
+		if(strcmp(dir[i],fullname)==0)
+			break;
+	}
+	dirmap[i]=0;
+	memset(dir[i], 0, MAX_FILENAME_LEN);
 }
 
 /*****************************************************************************
-*					ls
+*							ls
 *****************************************************************************/
 void ls()
 {
@@ -1008,7 +1073,7 @@ void ls()
 }
 
 /*****************************************************************************
-*									cd
+*							cd
 *****************************************************************************/
 void cd(char * arg1)
 {
@@ -1105,7 +1170,11 @@ void cd(char * arg1)
 }
 
 /*****************************************************************************
-*					miniRead
+*						miniRead
+*****************************************************************************/
+/**
+*param@ [in]   fullname
+*param@ [out]  buf
 *return 0 if success
 *****************************************************************************/
 int miniRead(char * fullname, char * buf)
@@ -1137,7 +1206,9 @@ int miniRead(char * fullname, char * buf)
 	return 0;	
 }
 /*****************************************************************************
-*					miniWrite
+*						miniWrite
+*****************************************************************************/
+/**
 *return 0 if success
 *****************************************************************************/
 int miniWrite(char * fullname, char * buf)
@@ -1164,7 +1235,7 @@ int miniWrite(char * fullname, char * buf)
 	return 0;
 }
 /*****************************************************************************
-*					truncate File
+*						truncateFile
 *****************************************************************************/
 void truncateFile(char * filename)
 {
@@ -1179,7 +1250,7 @@ void truncateFile(char * filename)
 	miniWrite(fullname, buf);
 }
 /*****************************************************************************
-*					extend File
+*						extendFile
 *****************************************************************************/
 void extendFile(char * filename)
 {
@@ -1219,7 +1290,7 @@ void extendFile(char * filename)
 	
 }
 /*****************************************************************************
-*					rewrite File
+*						rewriteFile
 *****************************************************************************/
 void rewriteFile(char * filename)
 {

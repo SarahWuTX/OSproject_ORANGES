@@ -165,6 +165,7 @@ PUBLIC void delay(int time)
 /*======================================================================*
                                str2Int
  *======================================================================*/
+/*
 PUBLIC int str2Int(char str[])
 {
 	int num = 0;
@@ -185,6 +186,7 @@ PUBLIC int str2Int(char str[])
 /*======================================================================*
                                getMag
  *======================================================================*/
+/*
 PUBLIC int getMag(int n) 
 {
 	int result = 1;
@@ -197,6 +199,7 @@ PUBLIC int getMag(int n)
 /*======================================================================*
                                getSize
  *======================================================================*/
+/*
 PUBLIC int getSize(char str[])
 {
 	int size = 0;
@@ -218,4 +221,4 @@ PUBLIC void showFormatString(char str[])
 	newStr[15] = '\0';     // set last in string to be end
 	printf("%s", newStr);
 	return newStr;
-}
+}*/
