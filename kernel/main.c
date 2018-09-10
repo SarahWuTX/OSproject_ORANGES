@@ -18,9 +18,7 @@
 #include "global.h"
 #include "proto.h"
 
-//#define	MAX_USER		2
 #define	MAX_DIRS		32
-
 
 char location[MAX_FILENAME_LEN] = "root";
 int dirmap[MAX_DIRS];
@@ -578,8 +576,7 @@ void shabby_shell(const char * tty_name)
 int checkFilename(const char * arg1)
 {
 	int n = strlen(arg1);
-	//printf("checking......n=%d......checking......\n",n);
-	if(n>MAX_FILENAME_LEN)
+    if(n>MAX_FILENAME_LEN)
 	{
 		printf("Please use a shorter filename\n");
 		return 0;
@@ -592,7 +589,6 @@ int checkFilename(const char * arg1)
 	char ch;
 	for(int i=0;i<n;i++){
 		ch = *(arg1+i);
-		//printf("checking......ch=%c......checking......\n",ch);
 		if(ch=='/' || ch=='.' || ch==' ' || ch=='#')
 		{
 			printf("Filename cannot contain \'#\'\'.\'\'/\'\' \'\n");
@@ -614,12 +610,9 @@ void getFullname(char * fullname, char * filename)
 {
 	memset(fullname, 0, MAX_FILENAME_LEN);
 	strcpy(fullname, location);
-	//printf("fullname:%s\n",fullname);
 	strcat(fullname, "/");
 	strcat(fullname, filename);
-	//printf("fullname:%s\n",fullname);
 	strrpl(fullname, '/', '_');
-	//printf("fullname:%s\n",fullname);
 }
 /*****************************************************************************
 *						welcome
@@ -695,7 +688,6 @@ void initFS()
 	char filename[MAX_FILENAME_LEN];
 	
 	fd = open("root", O_CREAT | O_RDWR);
-	//printf("fd=%d\n",fd);
 	close(fd);
 
 	fd = open("root", O_RDWR);
@@ -736,13 +728,10 @@ int isDir(const char * dirpath)
 void createFile(char * filename, char * buf)
 {
 	/* create & open new file */
-	int fd = -1;//, pos = -1;
+	int fd = -1;
 	char fullname[MAX_FILENAME_LEN];
 	getFullname(fullname, filename);
 	fd = open(fullname, O_CREAT | O_RDWR);
-	////////////////////////////////
-	//printf("fullname: %s\nfilename: %s\n content: %s\n", fullname, filename, buf);
-	///////////////////////////////
 	if (fd == -1)
 	{
 		return;
@@ -774,9 +763,6 @@ int updateDir(char * filename, int op)
 	char * dirpath;
 	strcpy(dirpath, location);
 	strrpl(dirpath,'/','_');
-////////////////////////////
-	//printf("updateDir()dirpath:%s\n",dirpath);
-///////////////////////////////
 
 	/* read dir */
 	char bufr[256];
@@ -784,10 +770,7 @@ int updateDir(char * filename, int op)
 	{
 		return -1;
 	}
-/////////////////////
-	//printf("before bufr:%s\n",bufr);
-///////////////////
-
+    
 	/* update dir */
 	int namelen = strlen(filename);
 	char temp[MAX_FILENAME_LEN];	/* store the filename temporally */
@@ -802,9 +785,6 @@ int updateDir(char * filename, int op)
 			while(*it){
 				if(*it == ' ')
 				{
-/////////////////////////////////////////////
-					//printf("get[%s]target[%s]\n",temp,filename);
-///////////////////////////////////////////////////
 					if(strcmp(filename,temp)==0)
 					{
 						/* found */
@@ -833,14 +813,10 @@ int updateDir(char * filename, int op)
 
 	
 	miniWrite(dirpath, bufr);
-/////////////////////
-	//printf("after bufr:%s\n",bufr);
-///////////////////
+
 	char bufcheck[256];
 	miniRead(dirpath, bufcheck);
-/////////////////////
-	//printf("now dir:%s\n",bufcheck);
-///////////////////
+
 	return 0;
 }
 /*****************************************************************************
@@ -867,25 +843,10 @@ void createDir(char * filename)
 	/* add item into dir[][] */
 	dirmap[i]=1;
 	strcpy(dir[i], fullname);
-//////////////////////////////////////
-/*
-	printf("i=%d,dir[i]=%s,fullname=%s\n",i,dir[i],fullname);
-	printf("*************this is dir list**********\n");
-	for(int j=0;j<MAX_DIRS;j++){
-		if(dirmap[j]==1)
-			printf("pos:%d,%s\n",j,dir[j]);
-
-	}
-*/
-////////////////////////////////////
 
 	/* create & open new dir */
 	int fd = -1;
-	//spin("open?");
 	fd = open(fullname, O_CREAT | O_RDWR);
-///////////////////////////////
-	//printf("Folder fullname: %s\n", fullname);
-//////////////////////////////
 	if (fd == -1)
 	{
 		/* roll back */
@@ -925,10 +886,7 @@ void readFile(char * filename)
 		printf("\'%s\' is not a file!\n",filename);
 		return;
 	}
-////////////////////////////
-	//printf("inside readFile()fullname:%s\n",fullname);
-/////////////////////////////
-
+    
 	/* read file */
 	char bufr[256];
 	if(miniRead(fullname, bufr) != 0)
@@ -942,7 +900,6 @@ void readFile(char * filename)
 	strcpy(pathname, fullname);
 	strrpl(pathname,'_','/');
 	printf("--------------------------------------------------\n");
-	//printf("Filepath: %s\n", pathname);
 	printf("Content: \n%s\n", bufr);
 	printf("--------------------------------------------------\n");
 
@@ -1005,9 +962,6 @@ void deleteDir(char * filename)
 		{
 			*t = 0;
 			getFullname(fullname, temp);
-///////////////////////////////////////////////////
-			printf("fullname[%s]\n",fullname);
-///////////////////////////////////////////////////
 			unlink(fullname);
 			printf("deleting[%s/%s]\n",location,temp);
 			if(isDir(fullname)==1)
@@ -1061,9 +1015,6 @@ void ls()
 	memset(dirpath, 0, MAX_FILENAME_LEN);
 	strcpy(dirpath, location);
 	strrpl(dirpath,'/','_');
-///////////////////////////////
-	//printf("inside ls()dirpath=%s\n",dirpath);
-/////////////////////////////////
 	/* open dir */
 	char bufr[256];
 	miniRead(dirpath, bufr);
@@ -1082,16 +1033,10 @@ void cd(char * arg1)
 	strcpy(location2, location);
 	char * lo = location2+strlen(location2); /* pointer of location2 */
 	char * ar = arg1; 			/* pointer of arg1 */
-////////////////////////////////////////
-	//printf("location2:%s,lo:%s,ar:%s\n",location2,lo-1,ar);
-////////////////////////////////////////
 
 	/* root */
 	if(strcmp(arg1, "/")==0)
 	{
-//////////////////////////////////
-		//printf("what1");
-////////////////////////////////
 		strcpy(location, "root");
 		return;
 	}
@@ -1099,9 +1044,6 @@ void cd(char * arg1)
 	/* start from root */
 	if(*ar == '/')
 	{
-/////////////////////////////
-		//printf("what2");
-////////////////////////////////
 		strcpy(location2, "root/");
 		lo=location2+strlen(location2);
 		ar++;
@@ -1116,11 +1058,9 @@ void cd(char * arg1)
 	while(*ar){
 		if(*ar == '.' && *(ar+1) == '.')	/* go back */
 		{
-			//printf("2\n");////////////////
 			lo -= 2;
 			*(lo+2) = 0;
 			*(lo+1) = 0;
-			//printf("now lo:%s\n",lo);
 			while(*lo != '/'){
 				lo--;
 				*(lo+1)=0;
@@ -1135,14 +1075,11 @@ void cd(char * arg1)
 		}
 		else
 		{
-			//printf("3\n");////////////////////
 			*lo++ = *ar++;
 		}
 
 	}
-////////////////////////////////////////
-	//printf("before check location2:%s,lo:%s\n",location2,lo);
-////////////////////////////////////////
+
 	/* remove '/' at the end of location2 if there is one */
 	lo = location2+strlen(location2)-1;
 	if(*lo == '/')
@@ -1150,9 +1087,6 @@ void cd(char * arg1)
 		lo--;
 		*(lo+1) = 0;
 	}
-////////////////////////////////////////
-	//printf("after location2:%s\n",location2);
-////////////////////////////////////////	
 
 	/* check if the dirctory exists */
 	char dirpath[MAX_FILENAME_LEN];
@@ -1191,16 +1125,11 @@ int miniRead(char * fullname, char * buf)
 		printf("File not found!\n");
 		return -1;
 	}
-////////////////////////
-	//printf("miniread()before:%s\n",buf);
-///////////////////////////
 
 	/* read file */
 	n = read(fd, buf, 256);
 	buf[n] = 0;
-////////////////////////
-	//printf("miniread()after:%s\n",buf);
-///////////////////////////
+
 	/* close file */
 	close(fd);
 	return 0;	
@@ -1225,9 +1154,6 @@ int miniWrite(char * fullname, char * buf)
 	}
 
 	/* write file */
-//////////////////////////////////
-	//printf("miniwrite()buf:%s\n",buf);
-///////////////////////////////////////
 	write(fd, buf, 256);
 
 	/* close file */
@@ -1272,13 +1198,9 @@ void extendFile(char * filename)
 	printf("Input content:\n");
 	int r2 = read(0, content, 256);
 	content[r2] = 0;
-///////////////////////////	
-	//printf("rdbuf:%s\nlen:%d\nbuf:%s\nlen:%d\n",content,strlen(content),buf,strlen(buf));
-//////////////////////////////
+
 	strcat(buf, content);
-///////////////////////////////
-	//printf("buf:%s\n",buf);
-////////////////////////////////
+
 	miniWrite(fullname, buf);
 
 	/* display result */
@@ -1305,9 +1227,6 @@ void rewriteFile(char * filename)
 	printf("Input content:\n");
 	int r2 = read(0, content, 256);
 	content[r2] = 0;
-///////////////////////
-	//printf("rdbuf:%s\n",content);	
-/////////////////////
 
 	/* rewrite file */
 	if(miniWrite(fullname, content) != 0)
