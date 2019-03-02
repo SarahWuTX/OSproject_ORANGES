@@ -194,3 +194,24 @@ mm 内存调度系统
 
 
 
+## 部分功能实现流程
+
+### 创建文件
+
+![](pics/0mkfile.png)
+
+### 创建文件夹
+
+![](pics/0mkdir.png)
+
+### 删除文件
+
+![](pics/0rmfile.png)
+
+### 删除文件夹
+
+![](pics/0rmdir.png)
+
+### 应用程序
+
+![](pics/0app.png)
